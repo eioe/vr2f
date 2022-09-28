@@ -1,0 +1,10 @@
+LICENSE
+README.md
+pyproject.toml
+setup.cfg
+setup.py
+Analysis/vrstereofem.egg-info/PKG-INFO
+Analysis/vrstereofem.egg-info/SOURCES.txt
+Analysis/vrstereofem.egg-info/dependency_links.txt
+Analysis/vrstereofem.egg-info/requires.txt
+Analysis/vrstereofem.egg-info/top_level.txt
