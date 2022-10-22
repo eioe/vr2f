@@ -3,11 +3,6 @@ README.md
 pyproject.toml
 setup.cfg
 setup.py
-src/Python/vr2fem_analyses.egg-info/PKG-INFO
-src/Python/vr2fem_analyses.egg-info/SOURCES.txt
-src/Python/vr2fem_analyses.egg-info/dependency_links.txt
-src/Python/vr2fem_analyses.egg-info/requires.txt
-src/Python/vr2fem_analyses.egg-info/top_level.txt
 src/Python/testpkg/__init__.py
 src/Python/testpkg/yoyo.py
 src/Python/vr2fem_analyses/__init__.py
