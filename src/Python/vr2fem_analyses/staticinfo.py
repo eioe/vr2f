@@ -17,7 +17,8 @@ class VR2FEMPATHS:
             raise ValueError('staticinfo seems to be in the wrong folder. \
                               Cannot point to project folder.')
         self.DATA_SUBJECTS = Path(self.PATH_PROJECT, 'Data', 'Subjects')
-        self.DATA_RAWFIF = Path(self.PATH_PROJECT, 'Data', 'raw_fif')
+        self.DATA_00_RAWFIF = Path(self.PATH_PROJECT, 'Data', 'raw_fif')
+        self.DATA_01_EPO = Path(self.PATH_PROJECT, 'Data', '01_epo')
     def getPath(self, key: str) -> Path:
         """Get path.
 
