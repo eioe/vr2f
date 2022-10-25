@@ -10,7 +10,7 @@ import os
 import mne
 import re
 from pathlib import Path
-from vr2fem_analyses.staticinfo import VR2FEMPATHS as PATHS
+from vr2fem_analyses.staticinfo import PATHS
 
 
 def get_data_and_events(subID: str, path_data: Path):

@@ -57,3 +57,6 @@ po/*~
 
 # Mac OS related
 .DS_Store
+
+# HPC stuff
+*core.raven02*

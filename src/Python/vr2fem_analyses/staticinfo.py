@@ -8,7 +8,7 @@ from pathlib import Path
 
 MAIN_PATH = ''
 
-class VR2FEMPATHS:
+class PATHS:
     """Store relevant paths for the project.
     """
     def __init__(self) -> None:
@@ -19,6 +19,9 @@ class VR2FEMPATHS:
         self.DATA_SUBJECTS = Path(self.PATH_PROJECT, 'Data', 'Subjects')
         self.DATA_00_RAWFIF = Path(self.PATH_PROJECT, 'Data', 'raw_fif')
         self.DATA_01_EPO = Path(self.PATH_PROJECT, 'Data', '01_epo')
+        self.DATA_02_ICA_AR = Path(self.PATH_PROJECT, 'Data', '02_ica', 'ar')
+        self.DATA_02_ICA = Path(self.PATH_PROJECT, 'Data', '02_ica')
+        self.DATA_02_AR = Path(self.PATH_PROJECT, 'Data', '02_ar')
     def getPath(self, key: str) -> Path:
         """Get path.
 
@@ -34,3 +37,26 @@ class VR2FEMPATHS:
         """
         return getattr(self, key)
 
+class TIMINGS:
+    def __init__(self) -> None:
+        self.DUR_BL = 0.2
+
+    def getTiming(self, key: str) -> float:
+        """Get time info.
+
+        Parameters
+        ----------
+        key : str
+            Identifier for the timing.
+
+        Returns
+        -------
+        float
+            Time info.
+        """
+        return getattr(self, key)
+
+
+class CONFIG:
+    def __init__(self) -> None:
+        self.N_JOBS = -2
