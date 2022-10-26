@@ -15,7 +15,7 @@ from pathlib import Path
 
 import mne
 
-from vr2fem_analyses.staticinfo import VR2FEMPATHS as PATHS
+from vr2fem_analyses.staticinfo import PATHS
 
 
 def setMontageChanTypes(raw: mne.io.Raw) -> mne.io.Raw:
@@ -31,11 +31,14 @@ def setMontageChanTypes(raw: mne.io.Raw) -> mne.io.Raw:
     mne.io.Raw
         Raw data with montage and EOG chan types set
     """
-    rn_ch_dict = {"AF7": "IO1", "AF8": "IO2", "FT9": "LO1", "FT10": "LO2"}
+    rn_ch_dict = {"AF7": "IO1",
+                  "AF8": "IO2",
+                  "FT9": "LO1",
+                  "FT10": "LO2"}
     raw.rename_channels(rn_ch_dict)
     print("renaming eog channels.")
 
-    EOG_chans = {ch: "eog" for ch in list(rn_ch_dict.values()) + ["Fp1", "Fp2"]}
+    EOG_chans = {ch: "eog" for ch in list(rn_ch_dict.values())}
     raw.set_channel_types(EOG_chans)
 
     easycap_montage = mne.channels.make_standard_montage("easycap-M1")
