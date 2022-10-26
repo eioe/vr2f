@@ -27,25 +27,9 @@ def main(sub_nr: int):
         fname = Path(paths.DATA_01_EPO, 'ica', f'{subID}-epo.fif')
         data_forICA = mne.read_epochs(fname)
 
-        # AR needs a montage
-        easycap_montage = mne.channels.make_standard_montage('easycap-M1')
-        data_forICA.set_montage(easycap_montage)
-
         # clean it with autoreject local to remove bad epochs for better ICA fit:
         data_forAR = data_forICA.copy().apply_baseline((-timings.DUR_BL, 0))
         # AR does not perform well on non-baseline corrected data
-
-        rn_ch_dict = {
-            'AF7': 'IO1',
-            'AF8': 'IO2',
-            'FT9': 'LO1',
-            'FT10': 'LO2'
-            }
-        data_forAR.rename_channels(rn_ch_dict) 
-        print('renaming eog channels.')
-
-        EOG_chans = {ch: 'eog' for ch in list(rn_ch_dict.values()) + ['Fp1', 'Fp2']}
-        data_forAR.set_channel_types(EOG_chans)
 
         _, ar, reject_log = preprocess.clean_with_ar_local(subID,
                                                         data_forAR,
