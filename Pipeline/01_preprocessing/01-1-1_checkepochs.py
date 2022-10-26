@@ -21,7 +21,7 @@ from vr2fem_analyses import preprocess, helpers
 
 %matplotlib qt
 
-def main(sub_nr: int):
+def main(sub_nr: int = None):
     paths = PATHS()
     timings = TIMINGS()
     config = CONFIG()
@@ -91,4 +91,13 @@ def main(sub_nr: int):
         fpath_ica.mkdir(exist_ok=True)
         fname_ica = Path(fpath_ica, f'{subID}-epo.fif')
         epochs_ica.save(fname_ica)
+
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        helpers.print_msg("Running Job Nr. " + sys.argv[1])
+        JOB_NR = int(sys.argv[1])
+    else:
+        JOB_NR = None
+    main(JOB_NR)
 
