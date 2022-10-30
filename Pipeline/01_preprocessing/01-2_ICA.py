@@ -43,7 +43,7 @@ def main(sub_nr: int):
         ica = preprocess.get_ica_weights(
             subID,
             data_forICA[~reject_log.bad_epochs],
-            picks=None,
+            picks=['eeg, 'eog'],
             reject=None,
             method="picard",
             fit_params=None,
