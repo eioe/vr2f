@@ -19,7 +19,6 @@ from vr2fem_analyses.staticinfo import PATHS, TIMINGS, CONFIG
 from vr2fem_analyses.staticinfo import TIMINGS
 from vr2fem_analyses import preprocess, helpers
 
-%matplotlib qt
 
 def main(sub_nr: int = None):
     paths = PATHS()
@@ -45,10 +44,10 @@ def main(sub_nr: int = None):
                                eeg=True,
                                eog=True,
                                exclude='bads')
-        epochs.compute_psd(method = 'welch',
+        epochs.compute_psd(method='welch',
                            fmin=0,
                            fmax=45,
-                           n_fft = nfft,
+                           n_fft=nfft,
                            picks=picks,
                            n_jobs=config.N_JOBS).plot()
 
@@ -74,23 +73,25 @@ def main(sub_nr: int = None):
                            picks=picks,
                            n_jobs=config.N_JOBS).plot()
 
-        epochs.interpolate_bads(reset_bads=True)
+        bads = epochs.info['bads']
+
+        epochs = epochs.interpolate_bads(reset_bads=False)
 
         # save:
         fpath = Path(paths.DATA_01_EPO, 'erp', 'clean')
         fpath.mkdir(exist_ok=True)
         fname = Path(fpath, f'{subID}-epo.fif')
-        epochs.save(fname)
+        epochs.save(fname, overwrite=True)
 
         # now also reject those chans from the copy for the ICA
         fname_ica = Path(paths.DATA_01_EPO, 'ica', f'{subID}-epo.fif')
         epochs_ica = mne.read_epochs(fname_ica)
-        epochs_ica.info['bads'] = epochs.info['bads']
+        epochs_ica.info['bads'] = bads
         epochs_ica.interpolate_bads(reset_bads=True)
         fpath_ica = Path(paths.DATA_01_EPO, 'ica', 'clean')
         fpath_ica.mkdir(exist_ok=True)
         fname_ica = Path(fpath_ica, f'{subID}-epo.fif')
-        epochs_ica.save(fname_ica)
+        epochs_ica.save(fname_ica, overwrite=True)
 
 
 if __name__ == '__main__':
