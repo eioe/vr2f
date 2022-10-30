@@ -40,10 +40,10 @@ def main(sub_nr: int):
         )
 
         # Get ICA weights
-        ica = preprocess.get_ica_weights(
+        _ = preprocess.get_ica_weights(
             subID,
             data_forICA[~reject_log.bad_epochs],
-            picks=['eeg, 'eog'],
+            picks=['eeg', 'eog'],
             reject=None,
             method="picard",
             fit_params=None,
