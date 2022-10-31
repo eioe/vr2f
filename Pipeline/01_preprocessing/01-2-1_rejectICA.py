@@ -37,6 +37,10 @@ def get_raw_and_events(subID: str, path_data: Path):
     return raw, events, event_id
 
 
+%matplotlib qt
+%load_ext autoreload
+%autoreload 2
+
 paths = PATHS()
 config = CONFIG()
 
@@ -44,7 +48,7 @@ config = CONFIG()
 sub_list_str = [s.split("-ica")[0] for s in os.listdir(paths.DATA_02_ICA)]
 
 
-subID = sub_list_str[9]
+subID = sub_list_str[15]
 
 # read raw
 fpath_raw = paths.DATA_00_RAWFIF
@@ -125,7 +129,7 @@ ica.exclude = exclude
 ica.plot_components(range(0, 32), inst=data_ica)
 ica.plot_components(range(32, 64), inst=data_ica)
 
-ica.plot_sources(inst=data_ica)  # [~bad_epos_idx_preica])
+ica.plot_sources(inst=data_ica)
 
 # check the psd how the rejection worked----------------------------
 data_ica_2 = data_ica.copy()
@@ -144,7 +148,8 @@ mne.viz.plot_sensors(data_ica_2.info, show_names=True)
 data_postica = ica.apply(data_erp.copy().load_data())
 
 ha = calc_bipolar_eog(data_postica.copy())
-ha.plot(picks="all")
+ha.filter(picks=['eog'], l_freq=None, h_freq=15).plot(picks="all", n_channels=66, scalings={'eeg': 25e-6, 'eog': 300e-6},
+    overview_mode='hidden')
 
 fpath_postica = Path(paths.DATA_02_POSTICA)
 fpath_postica.mkdir(exist_ok=True)
