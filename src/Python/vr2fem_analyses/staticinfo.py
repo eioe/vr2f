@@ -22,6 +22,8 @@ class PATHS:
         self.DATA_02_ICA_AR = Path(self.PATH_PROJECT, 'Data', '02_ica', 'ar')
         self.DATA_02_ICA = Path(self.PATH_PROJECT, 'Data', '02_ica')
         self.DATA_02_AR = Path(self.PATH_PROJECT, 'Data', '02_ar')
+        self.DATA_02_EOGANNOT = Path(self.PATH_PROJECT, 'Data', '02_eogannot')
+        self.DATA_02_POSTICA = Path(self.PATH_PROJECT, 'Data', '02_ica', 'cleaneddata')
     def getPath(self, key: str) -> Path:
         """Get path.
 
@@ -60,3 +62,4 @@ class TIMINGS:
 class CONFIG:
     def __init__(self) -> None:
         self.N_JOBS = -2
+        
