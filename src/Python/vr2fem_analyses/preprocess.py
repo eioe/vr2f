@@ -33,14 +33,14 @@ def clean_with_ar_local(
     else:
         if paths.DATA_02_ICA_AR == ar_path:
             append = "-preICA-ar"
-        elif paths.DATA_02_AR == ar_path:
+        elif paths.DATA_03_AR == ar_path:
             append = "-postICA-ar"
         else:
             message = (
                 "I only can write or read AR files in these folders:\n"
                 + paths.DATA_02_ICA_AR
                 + "\n"
-                + paths.DATA_02_AR
+                + paths.DATA_03_AR
             )
             raise ValueError(message)
 

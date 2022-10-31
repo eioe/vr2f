@@ -20,9 +20,9 @@ class PATHS:
         self.DATA_01_EPO = Path(self.PATH_PROJECT, 'Data', '01_epo')
         self.DATA_02_ICA_AR = Path(self.PATH_PROJECT, 'Data', '02_ica', 'ar')
         self.DATA_02_ICA = Path(self.PATH_PROJECT, 'Data', '02_ica')
-        self.DATA_02_AR = Path(self.PATH_PROJECT, 'Data', '02_ar')
         self.DATA_02_EOGANNOT = Path(self.PATH_PROJECT, 'Data', '02_eogannot')
-        self.DATA_02_POSTICA = Path(self.PATH_PROJECT, 'Data', '02_ica', 'cleaneddata')
+        self.DATA_02_POSTICA = Path(self.PATH_PROJECT, 'Data', '02_ica', 'cleaneddata'),
+        self.DATA_03_AR = Path(self.PATH_PROJECT, 'Data', '03_ar')
 
     def getPath(self, key: str) -> Path:
         """Get path.
