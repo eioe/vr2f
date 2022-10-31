@@ -16,6 +16,7 @@ from pathlib import Path
 import mne
 
 from vr2fem_analyses.staticinfo import PATHS
+from vr2fem_analyses.preprocess import calc_bipolar_eog
 
 
 def setMontageChanTypes(raw: mne.io.Raw) -> mne.io.Raw:
@@ -36,13 +37,14 @@ def setMontageChanTypes(raw: mne.io.Raw) -> mne.io.Raw:
                   "FT9": "LO1",
                   "FT10": "LO2"}
     raw.rename_channels(rn_ch_dict)
-    print("renaming eog channels.")
+    print("renaming facial eog channels.")
 
     EOG_chans = {ch: "eog" for ch in list(rn_ch_dict.values())}
     raw.set_channel_types(EOG_chans)
 
     easycap_montage = mne.channels.make_standard_montage("easycap-M1")
-    raw.set_montage(easycap_montage)
+    raw.set_montage(easycap_montage, on_missing='warn')
+
     return raw
 
 
