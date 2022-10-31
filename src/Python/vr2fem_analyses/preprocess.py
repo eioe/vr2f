@@ -244,7 +244,7 @@ def calc_bipolar_eog(data):
     Parameters
     ----------
     data : Raw or Epochs
-        Data; needs to have chans Fp1, Fp2, LO1, LO2, IO1, IO2. 
+        Data; needs to have chans Fp1, Fp2, LO1, LO2, IO1, IO2.
 
     Returns
     -------
@@ -262,7 +262,7 @@ def calc_bipolar_eog(data):
     else:
         raise ValueError('Invalid type. Only support raw or epochs.')
     dataVEOG = np.stack((dataL, dataR), axis=axis).mean(axis=axis)
-    
+
     dataHEOG = data.get_data(['LO1']) - data.get_data(['LO2'])
     dataEOG = np.concatenate((dataVEOG, dataHEOG), axis=axis)
     info = mne.create_info(ch_names=['VEOG', 'HEOG'], sfreq=data.info['sfreq'], ch_types=['eog', 'eog'])
