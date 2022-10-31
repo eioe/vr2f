@@ -38,7 +38,7 @@ def main(sub_nr: int):
         ars = []
         reject_logs = []
         # bunch of random seeds:
-        rand_ints = [30, 7, 19, 88, 307, 198, 8, 3, 0, 71988]
+        rand_ints = [30 , 7, 19, 88, 307, 198, 8, 3, 0, 71988]
         for rs in rand_ints:
             _, ar, reject_log = clean_with_ar_local(
                 subID,
@@ -59,20 +59,21 @@ def main(sub_nr: int):
         sims = [np.dot(norm_vec(avg_badepos), norm_vec(be)) for be in all_badepos]
 
         idx_max = np.argmax(sims)
-
-        fpath_out = Path(paths.DATA_03_AR, "cleaneddata")
-        fpath_out.mkdir(exist_ok=True)
+        
         _, ar, reject_log = clean_with_ar_local(
             subID,
             data_bl,
             n_jobs=config.N_JOBS,
             ar_from_disc=False,
             save_to_disc=True,
-            ar_path=fpath_out,
+            ar_path=paths.DATA_03_AR,
             rand_state=rand_ints[idx_max],
         )
 
-        file_diag = Path(fpath_out, "robustinfo", "info.txt")
+        fpath_out = Path(paths.DATA_03_AR, "robustinfo")
+        fpath_out.mkdir(exist_ok=True)
+        
+        file_diag = Path(fpath_out, "info.txt")
         n_bad_epos = [sum(rl.bad_epochs) for rl in reject_logs]
         n_epos_min = np.min(n_bad_epos)
         n_epos_max = np.max(n_bad_epos)
