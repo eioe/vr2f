@@ -2,11 +2,10 @@
 
 Keep paths, colors, etc. to access them throughout the project.
 """
-import os
-import sys
 from pathlib import Path
 
 MAIN_PATH = ''
+
 
 class PATHS:
     """Store relevant paths for the project.
@@ -24,6 +23,7 @@ class PATHS:
         self.DATA_02_AR = Path(self.PATH_PROJECT, 'Data', '02_ar')
         self.DATA_02_EOGANNOT = Path(self.PATH_PROJECT, 'Data', '02_eogannot')
         self.DATA_02_POSTICA = Path(self.PATH_PROJECT, 'Data', '02_ica', 'cleaneddata')
+
     def getPath(self, key: str) -> Path:
         """Get path.
 
@@ -38,6 +38,7 @@ class PATHS:
             Path object.
         """
         return getattr(self, key)
+
 
 class TIMINGS:
     def __init__(self) -> None:
@@ -62,4 +63,3 @@ class TIMINGS:
 class CONFIG:
     def __init__(self) -> None:
         self.N_JOBS = -2
-        
