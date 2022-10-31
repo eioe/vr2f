@@ -38,7 +38,7 @@ def main(sub_nr: int):
         ars = []
         reject_logs = []
         # bunch of random seeds:
-        rand_ints = [30 , 7, 19, 88, 307, 198, 8, 3, 0, 71988]
+        rand_ints = [30, 7, 19, 88, 307, 198, 8, 3, 0, 71988]
         for rs in rand_ints:
             _, ar, reject_log = clean_with_ar_local(
                 subID,
