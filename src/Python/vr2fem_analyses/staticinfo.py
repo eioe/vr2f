@@ -25,6 +25,7 @@ class PATHS:
         self.DATA_02_EOGANNOT = Path(self.PATH_PROJECT, "Data", "02_eogannot")
         self.DATA_02_POSTICA = Path(self.PATH_PROJECT, "Data", "02_ica", "cleaneddata")
         self.DATA_03_AR = Path(self.PATH_PROJECT, "Data", "03_ar")
+        self.DATA_04_DECOD_SENSORSPACE = Path(self.PATH_PROJECT, "Data", "04_decod", "sensorspace")
 
     def getPath(self, key: str) -> Path:
         """Get path.
