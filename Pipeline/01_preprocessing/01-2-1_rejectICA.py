@@ -45,10 +45,10 @@ paths = PATHS()
 config = CONFIG()
 
 # load data
-sub_list_str = [s.split("-ica")[0] for s in os.listdir(paths.DATA_02_ICA)]
+sub_list_str = [s.split("-ica")[0] for s in os.listdir(paths.DATA_02_ICA) if s.startswith('VR2FEM_')]
 
 
-subID = sub_list_str[15]
+subID = sub_list_str[33]
 
 # read raw
 fpath_raw = paths.DATA_00_RAWFIF
