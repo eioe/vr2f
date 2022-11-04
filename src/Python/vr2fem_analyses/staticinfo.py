@@ -66,3 +66,13 @@ class TIMINGS:
 class CONFIG:
     def __init__(self) -> None:
         self.N_JOBS = -2
+
+
+class COLORS():
+    def __init__(self) -> None:
+        self.COLDICT = {
+            'all': "#003049",
+            'mono': "#d62828",
+            'stereo': "#f77f00",
+            'viewcond': '#588157'
+        }

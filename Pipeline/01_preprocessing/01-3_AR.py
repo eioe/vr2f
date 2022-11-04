@@ -26,7 +26,7 @@ def main(sub_nr: int):
     for subID in sub_list_str:
         try:
             fname = Path(path_in, f"{subID}-postICA-epo.fif")
-            print(fname)
+            helpers.print_msg(str(fname))
             data_pre = mne.read_epochs(fname)
         except FileNotFoundError:
             print(f"No data for {subID}.")

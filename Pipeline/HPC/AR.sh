@@ -1,6 +1,6 @@
 #!/bin/bash -l 
 # specify the indexes of the job array elements
-#SBATCH --array=0-10
+#SBATCH --array=0-7
 # Standard output and error: 
 #SBATCH -o ./job.out.%j        # Standard output, %A = job ID, %a = job array index 
 #SBATCH -e ./job.err.%j        # Standard error, %A = job ID, %a = job array index 

@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 import json
 from collections import defaultdict
@@ -18,6 +19,7 @@ from mne.decoding import (
 )
 
 from vr2fem_analyses.staticinfo import PATHS, CONFIG
+from vr2fem_analyses import helpers
 
 
 def avg_time(data, step=25, times=None):
@@ -52,7 +54,7 @@ def get_data(subID, conditions, batch_size=1, smooth_winsize=1, picks="eeg"):
     paths = PATHS()
     path_in = Path(paths.DATA_03_AR, "cleaneddata")
     fname = Path(path_in, f"{subID}-postAR-epo.fif")
-    epos = mne.read_epochs(fname).pick(picks)
+    epos = mne.read_epochs(fname, verbose=False).pick(picks)
     times = epos.times
     info = epos.info
 
@@ -141,8 +143,18 @@ def decode(
 
     paths = PATHS()
     config = CONFIG()
+    conditions_target = [c.split('/')[-1] for c in conditions]
+    if len(conditions[0].split('/')) > 1:
+        if len(conditions[0].split('/')) > 2:
+            raise NotImplementedError('Cannot handle more than two cond levels yet.')
+        conditions_vc = [c.split('/')[0] for c in conditions]
+        if len(set(conditions_vc)) > 1:
+            raise ValueError('U r mixing viewing conditions. Uncool.')
+        conditions_vc = conditions_vc[0]
+    else:
+        conditions_vc = ''
 
-    contrast_str = "_vs_".join(conditions)
+    contrast_str = "_vs_".join(conditions_target)
     scoring = scoring  # 'roc_auc' # 'accuracy'
     cv_folds = 3
     cv = StratifiedKFold(n_splits=cv_folds, shuffle=True)
@@ -190,8 +202,8 @@ def decode(
 
             if shuffle_labels:
                 np.random.shuffle(y)
-            for i in np.unique(y):
-                print(f"Size of class {i}: {np.sum(y == i)}\n")
+            # for i in np.unique(y):
+            #     print(f"Size of class {i}: {np.sum(y == i)}\n")
             scores = cross_val_multiscore(se, X=X, y=y, cv=cv)
             scores = np.mean(scores, axis=0)
             all_scores.append(scores)
@@ -212,6 +224,7 @@ def decode(
 
         path_save = Path(
             paths.DATA_04_DECOD_SENSORSPACE,
+            conditions_vc,
             contrast_str,
             gen_str,
             scoring,
@@ -277,30 +290,44 @@ def decode(
     return sub_scores, sub_coef, times_n
 
 
-paths = PATHS()
-path_in = Path(paths.DATA_03_AR, "cleaneddata")
+def main(sub_nr: int):
+    paths = PATHS()
+    path_in = Path(paths.DATA_03_AR, "cleaneddata")
 
-# load data
-sub_list_str = [s.split("-postAR-epo")[0] for s in os.listdir(path_in)]
-subID = sub_list_str[7]
+    # load data
+    sub_list_str = [s.split("-postAR-epo")[0] for s in os.listdir(path_in)]
 
-fname = Path(path_in, f"{subID}-postAR-epo.fif")
-data = mne.read_epochs(fname)
+    if sub_nr is not None:
+        sub_list_str = [sub_list_str[sub_nr]]
 
-X, y, t, i = get_data(data, ["mono", "stereo"], picks="eeg")
+    for cond in ["all", "mono", "stereo"]:
+        if cond == "all":
+            vc = ""
+        else:
+            vc = cond + "/"
 
-scores, coefs, times = decode(
-    [subID],
-    conditions=['neutral', 'angry'],
-    scoring="accuracy",
-    n_rep_sub=3,
-    picks="eeg",
-    shuffle_labels=False,
-    batch_size=3,
-    smooth_winsize=10,
-    temp_gen=False,
-    save_single_rep_scores=False,
-    save_scores=True,
-    save_patterns=False,
-)
-plt.plot(times, scores)
+        for subID in sub_list_str:
+
+            scores, coefs, times = decode(
+                [subID],
+                conditions=[vc + 'happy', vc + 'neutral'],
+                scoring="accuracy",
+                n_rep_sub=50,
+                picks="eeg",
+                shuffle_labels=False,
+                batch_size=3,
+                smooth_winsize=5,
+                temp_gen=False,
+                save_single_rep_scores=False,
+                save_scores=True,
+                save_patterns=True,
+            )
+
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        helpers.print_msg("Running Job Nr. " + sys.argv[1])
+        JOB_NR = int(sys.argv[1])
+    else:
+        JOB_NR = None
+    main(JOB_NR)
