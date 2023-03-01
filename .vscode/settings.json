@@ -3,5 +3,6 @@
     "python.linting.flake8Enabled": true,
     "python.linting.pylintEnabled": false,
     "python.formatting.provider": "black",
-    "editor.foldingMaximumRegions": 50000
+    "editor.foldingMaximumRegions": 50000,
+    "notebook.output.textLineLimit": 500
 }

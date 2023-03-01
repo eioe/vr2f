@@ -55,12 +55,16 @@ cpal = sns.blend_palette(
     ["darkblue", "green", "darkred"], n_colors=6000, as_cmap=True, input="rgb"
 )
 
-plt.style.use('dark_background')
+cm = 1 / 2.54  # centimeters in inches
+plt.style.use('classic')
 for cond, annot in zip(cfs, [True, False, False]):
-    fig, ax = plt.subplots(1,1)
+    sns.set(rc={'axes.facecolor':'#0000FF', 'figure.facecolor':(0,0,0,0)})
+    fig, ax = plt.subplots(1,1, figsize=(19.5 * cm, 16.8 * cm), dpi=300)
     sns.heatmap(cf_avg[cond][:4], cmap="viridis", vmin=0, vmax=1, xticklabels=emo_list, yticklabels=emo_list[:-1], annot=annot, cbar=annot, ax=ax)  # cmap=cpal)  #
     ax.tick_params(axis='y', labelrotation=45)
     ax.tick_params(axis='x', labelrotation=45)
     ax.set_ylabel("ground truth")
     ax.set_xlabel("choice")
-    ax.set_title(cond)
+    ax.set_title("")  # (cond)
+    fig.tight_layout()
+    fig.savefig(Path(paths.FIGURES, f"confusion_matrix_{cond}.png"), dpi=300)
