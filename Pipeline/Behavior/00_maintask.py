@@ -67,4 +67,5 @@ for cond, annot in zip(cfs, [True, False, False]):
     ax.set_xlabel("choice")
     ax.set_title("")  # (cond)
     fig.tight_layout()
-    fig.savefig(Path(paths.FIGURES, f"confusion_matrix_{cond}.png"), dpi=300)
+    fig.savefig(Path(paths.FIGURES, f"confusion_matrix_{cond}.pdf"), dpi=300, 
+    transparent=True)
