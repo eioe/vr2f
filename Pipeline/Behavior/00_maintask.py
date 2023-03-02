@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 from sklearn.metrics import confusion_matrix
 import seaborn as sns
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -44,7 +45,7 @@ for subID in sub_list_str:
         if len(cf) < 5:
             cf = np.hstack((cf, np.zeros((4, 1))))
             cf = np.vstack((cf, np.zeros((1, 5))))
-        cf = cf / (90, 180)[cond == 'all']
+        cf = cf / (90, 180)[cond == "all"]
         cfs[cond].append(cf)
 
 cf_avg = {}
@@ -56,16 +57,31 @@ cpal = sns.blend_palette(
 )
 
 cm = 1 / 2.54  # centimeters in inches
-plt.style.use('classic')
+# plt.style.use("classic")
+
 for cond, annot in zip(cfs, [True, False, False]):
-    sns.set(rc={'axes.facecolor':'#0000FF', 'figure.facecolor':(0,0,0,0)})
-    fig, ax = plt.subplots(1,1, figsize=(19.5 * cm, 16.8 * cm), dpi=300)
-    sns.heatmap(cf_avg[cond][:4], cmap="viridis", vmin=0, vmax=1, xticklabels=emo_list, yticklabels=emo_list[:-1], annot=annot, cbar=annot, ax=ax)  # cmap=cpal)  #
-    ax.tick_params(axis='y', labelrotation=45)
-    ax.tick_params(axis='x', labelrotation=45)
+    sns.set(rc={"axes.facecolor": "#0000FF", "figure.facecolor": (0, 0, 0, 0)})
+    fig, ax = plt.subplots(1, 1, figsize=(19.5 * cm, 16.8 * cm), dpi=300)
+    sns.heatmap(
+        cf_avg[cond][:4],
+        cmap="viridis",
+        vmin=0,
+        vmax=1,
+        xticklabels=emo_list,
+        yticklabels=emo_list[:-1],
+        annot=annot,
+        cbar=annot,
+        ax=ax,
+    )  # cmap=cpal)  #
+    ax.tick_params(axis="y", labelrotation=45)
+    ax.tick_params(axis="x", labelrotation=45)
     ax.set_ylabel("ground truth")
     ax.set_xlabel("choice")
     ax.set_title("")  # (cond)
     fig.tight_layout()
-    fig.savefig(Path(paths.FIGURES, f"confusion_matrix_{cond}.pdf"), dpi=300, 
-    transparent=True)
+    matplotlib.rcParams['pdf.fonttype'] = 42
+    matplotlib.rcParams['ps.fonttype'] = 42
+    matplotlib.rcParams['font.family'] = 'Roboto'
+    fig.savefig(
+        Path(paths.FIGURES, f"confusion_matrix_{cond}.pdf"), dpi=300, transparent=True, bbox_inches="tight",
+    )

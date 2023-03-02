@@ -25,9 +25,10 @@ class PATHS:
         self.DATA_02_EOGANNOT = Path(self.PATH_PROJECT, "Data", "02_eogannot")
         self.DATA_02_POSTICA = Path(self.PATH_PROJECT, "Data", "02_ica", "cleaneddata")
         self.DATA_03_AR = Path(self.PATH_PROJECT, "Data", "03_ar")
-        self.DATA_04_DECOD_SENSORSPACE = Path(self.PATH_PROJECT, "Data", "04_decod", "sensorspace")
+        self.DATA_04_DECOD_SENSORSPACE = Path(
+            self.PATH_PROJECT, "Data", "04_decod", "sensorspace"
+        )
         self.FIGURES = Path(self.PATH_PROJECT, "Figures")
-        
 
     def getPath(self, key: str) -> Path:
         """Get path.
@@ -70,11 +71,15 @@ class CONFIG:
         self.N_JOBS = -2
 
 
-class COLORS():
+class COLORS:
     def __init__(self) -> None:
         self.COLDICT = {
-            'all': "#003049",
-            'mono': "#d62828",
-            'stereo': "#f77f00",
-            'viewcond': '#588157'
+            "all": "#003049",
+            "mono": "#9BC1BC",  # "#d62828",
+            "stereo": "#4BA3C3",  # "#f77f00",
+            "viewcond": "#588157",
+            "happy": "#307351",
+            "angry": "#840032",
+            "neutral": "#002642",
+            "surprised": "#E59500",
         }
