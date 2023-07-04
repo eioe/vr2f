@@ -85,10 +85,12 @@ def extract_epochs(
     _type_
         _description_
     """
+
     # filter the data:
-    filtered = raw_data.load_data().filter(
-        l_freq=l_freq, h_freq=h_freq, n_jobs=n_jobs, verbose=False
-    )
+    if (l_freq is not None) and (h_freq is not None):
+        filtered = raw_data.load_data().filter(
+            l_freq=l_freq, h_freq=h_freq, n_jobs=n_jobs, verbose=False
+        )
     epos_ = mne.Epochs(
         filtered,
         events,
@@ -181,21 +183,31 @@ def main():
 
         check_epo_numbers(subID, len(epos_erp.events))
 
-        fpath = Path(paths.DATA_01_EPO, "erp")
-        fpath.mkdir(parents=True, exist_ok=True)
+        # fpath = Path(paths.DATA_01_EPO, "erp")
+        # fpath.mkdir(parents=True, exist_ok=True)
 
-        fname = Path(fpath, f"{subID}-epo.fif")
-        epos_erp.save(fname, overwrite=True)
+        # fname = Path(fpath, f"{subID}-epo.fif")
+        # epos_erp.save(fname, overwrite=True)
 
-        # make epochs for ICA [1.0 40]
-        epos_ica = extract_epochs(
-            raw, events_faceonset, event_dict, tmin=-0.3, tmax=1.0, l_freq=1, h_freq=40
+        # # make epochs for ICA [1.0 40]
+        # epos_ica = extract_epochs(
+        #     raw, events_faceonset, event_dict, tmin=-0.3, tmax=1.0, l_freq=1, h_freq=40
+        # )
+
+        # fpath = Path(paths.DATA_01_EPO, "ica")
+        # fpath.mkdir(parents=True, exist_ok=True)
+        # fname = Path(fpath, f"{subID}-epo.fif")
+        # epos_ica.save(fname, overwrite=True)
+
+        # make unfiltered epochs:
+        epos_unfiltered = extract_epochs(
+            raw, events_faceonset, event_dict, tmin=-0.3, tmax=1.0, l_freq=None, h_freq=None
         )
 
-        fpath = Path(paths.DATA_01_EPO, "ica")
+        fpath = Path(paths.DATA_01_EPO, "unfiltered")
         fpath.mkdir(parents=True, exist_ok=True)
         fname = Path(fpath, f"{subID}-epo.fif")
-        epos_ica.save(fname, overwrite=True)
+        epos_unfiltered.save(fname, overwrite=True)
 
 
 if __name__ == "__main__":

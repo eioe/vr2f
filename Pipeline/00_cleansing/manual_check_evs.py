@@ -15,7 +15,7 @@ import pandas as pd
 from logging import exception, warning
 
 import mne
-from vr2fem_analyses.staticinfo import VR2FEMPATHS as PATHS
+from vr2fem_analyses.staticinfo import PATHS
 
 paths = PATHS()
 subID_problematic = ['VR2FEM_S09']

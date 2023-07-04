@@ -300,18 +300,23 @@ def main(sub_nr: int):
     if sub_nr is not None:
         sub_list_str = [sub_list_str[sub_nr]]
 
-    for cond in ["all", "mono", "stereo"]:
-        if cond == "all":
+    emotions = ["angry", "surprised"]  # ["happy", "neutral"]  # ["angry", "neutral"]  #  ["surprised", "neutral", "angry", "happy"]
+    viewconds = ["all"]  # ["mono", "stereo"]  #  ["all", "mono", "stereo"]
+    ids = ["id1", "id2", "id3"]
+
+
+    for viewcond in viewconds:
+        if viewcond == "all":
             vc = ""
         else:
-            vc = cond + "/"
+            vc = viewcond + "/"
 
         for subID in sub_list_str:
 
             scores, coefs, times = decode(
                 [subID],
-                conditions=[vc + 'happy', vc + 'neutral'],
-                scoring="accuracy",
+                conditions= ids,  #[vc + emo for emo in emotions],  #  ["mono", "stereo"],  # 
+                scoring="roc_auc_ovr",  #  "roc_auc_ovr",
                 n_rep_sub=50,
                 picks="eeg",
                 shuffle_labels=False,

@@ -67,6 +67,7 @@ for cond, annot in zip(cfs, [True, False, False]):
         cmap="viridis",
         vmin=0,
         vmax=1,
+        square=True,
         xticklabels=emo_list,
         yticklabels=emo_list[:-1],
         annot=annot,
@@ -85,3 +86,10 @@ for cond, annot in zip(cfs, [True, False, False]):
     fig.savefig(
         Path(paths.FIGURES, f"confusion_matrix_{cond}.pdf"), dpi=300, transparent=True, bbox_inches="tight",
     )
+
+    source = str(Path(paths.FIGURES, f"confusion_matrix_{cond}.pdf"))
+    dest = "keeper:NEUROHUM/Subprojects/VRstereofem/Figures"
+    cmd = f"rclone copy {source} {dest}"
+
+    os.system(cmd)
+    print(cmd)

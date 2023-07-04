@@ -28,6 +28,7 @@ class PATHS:
         self.DATA_04_DECOD_SENSORSPACE = Path(
             self.PATH_PROJECT, "Data", "04_decod", "sensorspace"
         )
+        self.DATA_ET_PREPROC = Path(self.PATH_PROJECT, "Data", "ET", "01_preproc")
         self.FIGURES = Path(self.PATH_PROJECT, "Figures")
 
     def getPath(self, key: str) -> Path:
