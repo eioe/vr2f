@@ -1,5 +1,5 @@
 Metadata-Version: 2.1
-Name: vr2fem-analyses
+Name: vr2fem_analyses
 Version: 0.0.1
 Summary: Analyses vrstereofem study (2022)
 Author: Felix Klotzsche
@@ -12,6 +12,16 @@ Platform: win32
 Classifier: Programming Language :: Python :: 3
 Classifier: Programming Language :: Python :: 3 :: Only
 Classifier: Programming Language :: Python :: 3.10
-Requires-Python: <3.11,>=3.8
-Provides-Extra: testing
+Requires-Python: >=3.8
 License-File: LICENSE
+Requires-Dist: matplotlib
+Requires-Dist: numpy>=1.23.1
+Requires-Dist: pandas==1.4.3
+Requires-Dist: toml
+Requires-Dist: setuptools
+Provides-Extra: testing
+Requires-Dist: flake8>=5.0.4; extra == "testing"
+Requires-Dist: tox>=3.25.1; extra == "testing"
+Requires-Dist: pytest>=7.1.2; extra == "testing"
+Requires-Dist: pytest-cov>=3.0; extra == "testing"
+Requires-Dist: mypy>=0.971; extra == "testing"
