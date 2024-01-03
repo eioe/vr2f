@@ -17,14 +17,15 @@ def main(sub_nr: int):
     timings = TIMINGS()
     path_data = Path(paths.DATA_01_EPO, "erp")
     # load data
-    sub_list_str = [s.split("-epo")[0] for s in os.listdir(path_data)]
+    sub_list_str = [s.split("-epo")[0] for s in os.listdir(path_data) if s.startswith("VR2FEM")]
+    sub_list_str.sort()
 
     if sub_nr is not None:
         sub_list_str = [sub_list_str[sub_nr]]
 
     for subID in sub_list_str:
 
-        fname = Path(paths.DATA_01_EPO, "ica", f"{subID}-epo.fif")
+        fname = Path(paths.DATA_01_EPO, "ica", "clean", f"{subID}-epo.fif")
         data_forICA = mne.read_epochs(fname)
 
         # clean it with autoreject local to remove bad epochs for better ICA fit:
