@@ -17,16 +17,17 @@ import re
 from pathlib import Path
 
 import mne
+
 from vr2f.staticinfo import PATHS
 
 
-def get_data_and_events(subID: str, path_data: Path):
+def get_data_and_events(sub_id: str, path_data: Path):
     """
     Load data, events, and event dict.
 
     Parameters
     ----------
-    subID : str
+    sub_id : str
         Subject ID (e.g., 'VR2FEM_S03')
     path_data : Path
         _description_
@@ -41,13 +42,13 @@ def get_data_and_events(subID: str, path_data: Path):
         Event dict
 
     """
-    fname_inp = Path(path_data, subID + "-raw.fif")
+    fname_inp = Path(path_data, sub_id + "-raw.fif")
     raw = mne.io.read_raw_fif(fname_inp)
     events, event_id = mne.events_from_annotations(raw)
     return raw, events, event_id
 
 
-def extract_epochs(
+def extract_epochs(  # noqa: PLR0913
     raw_data,
     events,
     event_id_,
@@ -111,23 +112,22 @@ def extract_epochs(
     return epos_
 
 
-def check_epo_numbers(subID: str, n_epos: int):
+def check_epo_numbers(sub_id: str, n_epos: int):
     """
     Check whether the subject has the expected number of epochs.
 
     Parameters
     ----------
-    subID : str
+    sub_id : str
         Subject ID (e.g., 'VR2FEM_S03')
     n_epos : int
         Number of epochs/events in data.
 
     """
-    if subID in ("VR2FEM_S03", "VR2FEM_S06", "VR2FEM_S19", "VR2FEM_S23", "VR2FEM_S32"):
-        expected = 717
-    else:
-        expected = 720
-    assert n_epos == expected, "Problem with trial numbers"
+    subs_with_717_exception = ("VR2FEM_S03", "VR2FEM_S06", "VR2FEM_S19", "VR2FEM_S23", "VR2FEM_S32")
+    expected = 717 if sub_id in subs_with_717_exception else 720
+    if n_epos != expected:
+        raise ValueError(f"Subject {sub_id} has {n_epos} epochs, but should have {expected}.")
 
 
 def main():
@@ -164,8 +164,8 @@ def main():
         "stereo/id3/surprised": 234,
     }
 
-    for subID in sub_list_str:
-        raw, events, ev_dict_full = get_data_and_events(subID, path_data)
+    for sub_id in sub_list_str:
+        raw, events, ev_dict_full = get_data_and_events(sub_id, path_data)
 
         # trim event_dict to relevant events
         ev_dict_stripped = {
@@ -187,12 +187,12 @@ def main():
             h_freq=40,
         )
 
-        check_epo_numbers(subID, len(epos_erp.events))
+        check_epo_numbers(sub_id, len(epos_erp.events))
 
         fpath = Path(paths.DATA_01_EPO, "erp")
         fpath.mkdir(parents=True, exist_ok=True)
 
-        fname = Path(fpath, f"{subID}-epo.fif")
+        fname = Path(fpath, f"{sub_id}-epo.fif")
         epos_erp.save(fname, overwrite=True)
 
         # make epochs for ICA [1.0 40]
@@ -200,7 +200,7 @@ def main():
 
         fpath = Path(paths.DATA_01_EPO, "ica")
         fpath.mkdir(parents=True, exist_ok=True)
-        fname = Path(fpath, f"{subID}-epo.fif")
+        fname = Path(fpath, f"{sub_id}-epo.fif")
         epos_ica.save(fname, overwrite=True)
 
         # make unfiltered epochs:
@@ -210,7 +210,7 @@ def main():
 
         fpath = Path(paths.DATA_01_EPO, "unfiltered")
         fpath.mkdir(parents=True, exist_ok=True)
-        fname = Path(fpath, f"{subID}-epo.fif")
+        fname = Path(fpath, f"{sub_id}-epo.fif")
         epos_unfiltered.save(fname, overwrite=True)
 
 

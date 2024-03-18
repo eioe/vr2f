@@ -1,3 +1,10 @@
+"""
+Calculate behavioral confusion matrix.
+
+This script calculates the confusion matrix for the behavioral data of the main task.
+"""
+#TODO: Add fig number to doc string
+
 import os
 from pathlib import Path
 
@@ -7,25 +14,28 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
-from vr2fem_analyses.staticinfo import COLORS, CONFIG, PATHS
+
+from vr2f.staticinfo import PATHS
 
 paths = PATHS()
+n_block_training = 2
 
 path_subs = paths.DATA_SUBJECTS
 sub_list_str = sorted(os.listdir(path_subs))
 
-subID = sub_list_str[0]
+subs_incomplete = ["VR2FEM_S09"]
+sub_list_str = [s for s in sub_list_str if s not in subs_incomplete]
 
 emo_list = ["neutral", "happy", "angry", "surprised", "other"]
 
 cfs = {"all": [], "stereo": [], "mono": []}
-for subID in sub_list_str:
-    path_in = Path(path_subs, subID, "MainTask", "Unity", "S001")
+for sub_id in sub_list_str:
+    path_in = Path(path_subs, sub_id, "MainTask", "Unity", "S001")
     fname = Path(path_in, "trial_results.csv")
     t_res = pd.read_csv(fname)
 
     # drop training trials:
-    t_res = t_res[t_res.block_type == 2]
+    t_res = t_res[t_res.block_type == n_block_training]
     # and trials without response
     t_res = t_res[t_res.selected_emotion != -1]
 
@@ -39,11 +49,9 @@ for subID in sub_list_str:
                 t_res_c = t_res
         cf_ing = t_res_c[["emo", "selected_emotion"]]
 
-        cf = confusion_matrix(cf_ing.emo, cf_ing.selected_emotion)
-        # cf = cf / 180
-        if len(cf) < 5:
-            cf = np.hstack((cf, np.zeros((4, 1))))
-            cf = np.vstack((cf, np.zeros((1, 5))))
+        cf = confusion_matrix(cf_ing.emo, cf_ing.selected_emotion, labels=(1,2,3,4,5))
+
+        # normalize by the number of trials per condition
         cf = cf / (90, 180)[cond == "all"]
         cfs[cond].append(cf)
 
@@ -54,7 +62,6 @@ for cond in cfs:
 cpal = sns.blend_palette(["darkblue", "green", "darkred"], n_colors=6000, as_cmap=True, input="rgb")
 
 cm = 1 / 2.54  # centimeters in inches
-# plt.style.use("classic")
 
 for cond, annot in zip(cfs, [True, False, False], strict=False):
     sns.set(rc={"axes.facecolor": "#0000FF", "figure.facecolor": (0, 0, 0, 0)})
@@ -91,5 +98,5 @@ for cond, annot in zip(cfs, [True, False, False], strict=False):
     dest = "keeper:NEUROHUM/Subprojects/VRstereofem/Figures"
     cmd = f"rclone copy {source} {dest}"
 
-    os.system(cmd)
+    os.system(cmd)  # noqa: S605
     print(cmd)
