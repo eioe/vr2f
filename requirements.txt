@@ -1,8 +1,0 @@
-matplotlib
-numpy
-pandas
-toml
-seaborn
-setuptools>=62.3
-tqdm
-

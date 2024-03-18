@@ -1,9 +1,11 @@
 """
-The facesim3d package installation and unit testing is adapted from:
+Setup of the vr2f package.
 
-https://github.com/mCodingLLC/SlapThatLikeButton-TestingStarterProject
+Check the new setuptools installation (Oct, 2022), purely based on pyproject.toml:
+* https://setuptools.pypa.io/en/latest/userguide/pyproject_config.html
+* https://packaging.python.org/en/latest/specifications/declaring-project-metadata/#declaring-project-metadata
 
-See the corresponding tutorial:
+Check out this tutorial for more information on how to package a Python project:
 https://www.youtube.com/watch?v=DhUpxWjOhME
 """
 

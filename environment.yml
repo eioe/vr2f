@@ -1,4 +1,4 @@
-name: vr2fem
+name: vr2f_3.11
 channels:
   - conda-forge
   - defaults
