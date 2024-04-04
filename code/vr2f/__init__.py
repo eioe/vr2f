@@ -8,4 +8,6 @@ __version__ = "0.1.0"
 import vr2f.behavior
 import vr2f.cleansing
 import vr2f.decoding
+import vr2f.eyetracking
 import vr2f.preprocessing
+import vr2f.utils

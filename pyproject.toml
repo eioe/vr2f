@@ -4,7 +4,7 @@ name = "vrstereofem"
 version = "0.1.0"
 description = "Decoding facial expressions from eeg in mono vs stereoscopic viewing conditions."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 license = { file = "LICENSE" }
 authors = [
     { name = "Felix Klotzsche", email = "klotzsche@cbs.mpg.de" },

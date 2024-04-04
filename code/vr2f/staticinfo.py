@@ -98,3 +98,12 @@ class COLORS:
             "neutral": "#002642",
             "surprised": "#E59500",
         }
+
+class CONSTANTS:
+    """Store constant values."""
+
+    def __init__(self) -> None:
+        """Initialize constant values."""
+        self.SFREQ_ET = 120
+        self.SFREQ_EEG = 500
+        self.N_TRIALS_TRAINING = 24
