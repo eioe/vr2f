@@ -129,8 +129,8 @@ class LagCalculatorEyetrackingVsEog:
       idx_times = ((et_times >= np.min(eog_times)) &
                   (et_times <= np.max(eog_times)))
       # make fixed length relative to t0 (assuming sfreq of 120Hz)
-      n_neg = int(self.constants.SFREQ_ET * 0.250)
-      n_pos = int(self.constants.SFREQ_ET * 0.950)
+      n_neg = int(self.constants.SFREQ_ET * 0.200)
+      n_pos = int(self.constants.SFREQ_ET * 0.900)
       # make mask:
       idx_tzero = et_times.abs().idxmin()
       mask = np.zeros(len(et_times), dtype=bool)
@@ -182,7 +182,7 @@ class LagCalculatorEyetrackingVsEog:
     return xcorrs, lags
 
 
-  def plot_xcorrs(self, xcorrs, lags, sub_id=""):
+  def plot_xcorrs(self, xcorrs, lags, sub_id="", save_to_file=True):
     """Plot cross-correlations and lags."""
     m_v = np.nanmean(np.asarray(np.abs(xcorrs["vert"])), axis=0)
     m_h = np.nanmean(np.asarray(xcorrs["hor"]), axis=0)
@@ -216,12 +216,13 @@ class LagCalculatorEyetrackingVsEog:
     plt.legend(["Vertical", "Horizontal"])
     plt.text(lag_mean * self.constants.SFREQ_ET, 0, f"mean lag: {(1000 * lag_mean):.1f}ms", color="r")
 
-    # save to file
-    path_out = Path(self.paths.DATA_ET_PREPROC, "lags", "plots")
-    chkmkdir(path_out)
-    fpath_out = Path(path_out, f"{sub_id}_xcorr.png")
-    plt.savefig(fpath_out)
-    plt.close()
+    if save_to_file:
+      # save to file
+      path_out = Path(self.paths.DATA_ET_PREPROC, "lags", "plots")
+      chkmkdir(path_out)
+      fpath_out = Path(path_out, f"{sub_id}_xcorr.png")
+      plt.savefig(fpath_out)
+      plt.close()
 
 
   def write_lag_df_csv(self, xcorrs, lags, sub_id):
