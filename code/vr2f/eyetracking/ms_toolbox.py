@@ -6,14 +6,6 @@ import pandas as pd
 from vr2f.staticinfo import PATHS
 
 
-def import_demo_data():
-  paths = PATHS()
-  fpath = Path(paths.DATA_ET, "ms_toolbox_demodata")
-  fname = "f01.005.dat"
-  data = np.loadtxt(Path(fpath, fname))
-  return data
-
-
 def vecvel(data, srate, vel_type=2):
   """
   Compute velocity from eye-tracking data.
@@ -130,7 +122,7 @@ def microsacc(data, srate, vfac = 5, mindur = 3):  # noqa: C901, PLR0915
       if dur >= mindur:
         nsac += 1
         offset = i
-        sac.append([indx[onset], indx[offset], 0, 0, 0, 0, 0])
+        sac.append([int(indx[onset]), int(indx[offset]), 0, 0, 0, 0, 0])
       onset = i + 1
       dur = 1
     i = i + 1
@@ -139,7 +131,7 @@ def microsacc(data, srate, vfac = 5, mindur = 3):  # noqa: C901, PLR0915
   if dur >= mindur:
     nsac = nsac + 1
     offset = i
-    sac.append([indx[onset],indx[offset], 0, 0, 0, 0, 0])
+    sac.append([int(indx[onset]), int(indx[offset]), 0, 0, 0, 0, 0])
 
   if nsac > 0:
     # Compute peak velocity, horiztonal and vertical components
@@ -172,17 +164,42 @@ def microsacc(data, srate, vfac = 5, mindur = 3):  # noqa: C901, PLR0915
 
     sac_arr = np.array(sac)
     # Convert to DataFrame
-    sac_df = pd.DataFrame(sac_arr, columns = ["idx_onset", "idx_offset", "vpeak", "vec_x", "vec_y", "amp_x", "amp_y"])
+    sac_df = pd.DataFrame(sac_arr,
+                          columns = ["idx_onset", "idx_offset", "vpeak", "vec_x",
+                                     "vec_y", "amp_x", "amp_y"])
+    sac_df = sac_df.astype({"idx_onset": int, "idx_offset": int})
 
   else:
-    sac_df = pd.DataFrame(columns = ["idx_onset", "idx_offset", "vpeak", "vec_x", "vec_y", "amp_x", "amp_y"])
-
+    sac_df = pd.DataFrame(columns = ["idx_onset", "idx_offset", "vpeak", "vec_x",
+                                     "vec_y", "amp_x", "amp_y"])
   return sac_df, radius
 
-dat = import_demo_data()
-idx = range(3000,4500)
-xl = dat[idx,1:3]
-vv = vecvel(xl, 500)
-sac, radius = microsacc(xl, 500)
-sac
 
+
+def import_demo_data():
+  paths = PATHS()
+  fpath = Path(paths.DATA_ET, "ms_toolbox_demodata")
+  fname = "f01.005.dat"
+  data = np.loadtxt(Path(fpath, fname))
+
+  fname_res = "f01.005_results.csv"
+  results = pd.read_csv(Path(fpath, fname_res), header=None,
+                        names=["idx_onset", "idx_offset", "vpeak", "vec_x",
+                               "vec_y", "amp_x", "amp_y"])
+  # adjust indices to 0-based
+  results["idx_onset"] = results["idx_onset"] - 1
+  results["idx_offset"] = results["idx_offset"] - 1
+  return data, results
+
+
+def test_microsacc():
+  dat, res = import_demo_data()
+  idx = range(3000,4500)
+  xl = dat[idx,1:3]
+  sac, radius = microsacc(xl, 500)
+  
+  if not np.allclose(sac.copy().to_numpy().flatten(),
+                     res.copy().to_numpy().flatten()):
+    raise ValueError("Test failed.")
+  else:
+    print("Test succeeded.")
