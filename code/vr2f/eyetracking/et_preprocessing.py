@@ -225,3 +225,23 @@ def get_et_rawfiles(sub_id: str) -> tuple[list, os.PathLike] | None:
 
     return sorted(et_files), path_in
 
+
+def set_to_fixed_sample_length(df_in, sfreq, dur_pre, dur_post):
+    # make fixed length relative to t0 (assuming sfreq of 120Hz)
+    df_et = df_in.copy().reset_index()
+    n_neg = int(sfreq * dur_pre)
+    n_pos = int(sfreq * dur_post)
+    # make mask:
+    times = df_et["times"]
+    idx_tzero = times.abs().idxmin()
+    mask = np.zeros(len(times), dtype=bool)
+    mask[(idx_tzero - n_neg):(idx_tzero + n_pos + 1)] = True
+    df_out = df_et[mask]
+    times_new = np.linspace(-1*n_neg*1/sfreq, n_pos*1/sfreq, len(df_out))
+    times_old = df_out["times"].dropna().to_numpy()
+    if ((np.abs(np.min(times_new) - np.min(times_old)) > 2/sfreq) or 
+        (np.abs(np.max(times_new) - np.max(times_old)) > 2/sfreq)):
+        print("WARNING: something is off with the timings.")
+    df_out["times"] = times_new
+
+    return df_out
