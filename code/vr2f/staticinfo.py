@@ -109,3 +109,10 @@ class CONSTANTS:
         self.SFREQ_ET = 120
         self.SFREQ_EEG = 500
         self.N_TRIALS_TRAINING = 24
+        self.CM = 1/2.54
+        self.COND_DICT = {
+            "viewcond": {1: "mono", 2: "stereo"},
+            "emotion": {1: "neutral", 2: "happy", 3: "angry", 4: "surprised"},
+            "avatar_id": {1: "Woman_01", 2: "Woman_04", 3: "Woman_08"},
+            }
+
