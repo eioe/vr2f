@@ -31,6 +31,7 @@ class PATHS:
         self.DATA_04_DECOD_SENSORSPACE = Path(self.PATH_PROJECT, "data", "04_decod", "sensorspace")
         self.DATA_ET = Path(self.PATH_PROJECT, "data", "eye_tracking")
         self.DATA_ET_PREPROC = Path(self.PATH_PROJECT, "data", "eye_tracking", "01_preproc")
+        self.DATA_ET_DECOD = Path(self.DATA_ET, "03_decoding")
         self.FIGURES = Path(self.PATH_PROJECT, "results", "figures")
         self.STIMULIIMAGES = Path(self.PATH_PROJECT, "data", "images", "stimuli")
 
