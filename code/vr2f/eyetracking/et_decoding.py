@@ -1,115 +1,20 @@
-import json
-import multiprocessing as mp
 import os
 import sys
 
 # %% load libs:
 from collections import defaultdict
-from os import path as op
 from pathlib import Path
 
-import matplotlib
-import matplotlib.pyplot as plt
 import mne
 import numpy as np
 import pandas as pd
-import seaborn as sns
-
-# from mne.epochs import concatenate_epochs
 from mne.decoding import GeneralizingEstimator, LinearModel, SlidingEstimator, cross_val_multiscore, get_coef
-from scipy import stats
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import BaseCrossValidator, StratifiedKFold, check_cv
+from sklearn.model_selection import StratifiedKFold
 from sklearn.pipeline import make_pipeline
+
+from vr2f import helpers
 from vr2f.staticinfo import PATHS
-from vr2fem_analyses import helpers
-
-
-def cart2sph_custom(x, y, z):
-    """Convert cartesian coordinates (xyz) to spherical coordinates (theta-phi-r)"""
-    hypotxz = np.hypot(x, z)
-    r = np.hypot(y, hypotxz)
-    phi = np.arctan2(y, hypotxz)
-    theta = np.arctan2(x, z)
-
-    # translate both to degree
-    theta = np.rad2deg(theta)
-    phi = np.rad2deg(phi)
-
-    # concatenate the 3 arrays to a 2d array
-    sph = np.stack((theta, phi, r), axis=1)
-    return sph
-
-
-def interpolate_blinks(et_data: pd.DataFrame):
-    """
-    Interpolate blinks in the eye tracking data.
-
-    According to the method suggested by
-    Kret, M.E., Sjak-Shie, E.E. Preprocessing pupil size data: Guidelines and code.
-    Behav Res 51, 1336–1342 (2019). https://doi.org/10.3758/s13428-018-1075-y
-
-    Parameters
-    ----------
-    et_data : pd.DataFrame
-        Eye tracking data as returned by `read_et_data()`
-
-    Returns
-    -------
-    et_data : pd.DataFrame
-        Eye tracking data with blinks interpolated.
-
-    """
-    df = et_data.copy()
-
-    p_dil = df["diameter_left"].to_numpy()
-    t_et = df["timestamp_et"].to_numpy()
-    d = np.diff(p_dil)
-    d_pre = d[:-1]
-    d_post = d[1:]
-    t = np.diff(t_et)
-    t_pre = t[:-1]
-    t_post = t[1:]
-
-    o = np.max(np.array((np.abs(d_pre / t_pre), np.abs(d_post / t_post))), axis=0)
-
-    mad = np.median(np.abs(o - np.median(o)))
-    thresh = np.median(o) + 50 * mad
-    label = o > thresh
-    # repeat the first and last label to get the same length as the original array
-    label = np.insert(label, 0, label[0])
-    label = np.append(label, label[-1])
-    df["blink"] = label
-    # set blink to 1 if dilation is < 0
-    df.loc[df["diameter_left"] < 0, "blink"] = 1
-
-    blink_times = df.loc[df["blink"] == 1, "timestamp_et"]
-    # find all timestamps_et which are closer than 50ms to a blink
-    blink_times = blink_times.to_numpy()
-    et_times = df["timestamp_et"].to_numpy()
-    if len(blink_times) == 0:
-        blink_times = np.array([-99])
-    # repeat blink times len(et_times) along new axis
-    blink_times_r = np.repeat(blink_times[:, np.newaxis], len(et_times), axis=1)
-
-    mindist = np.min(np.abs(et_times - blink_times_r), axis=0)
-    df["blink"] = mindist < 100
-
-    # set theta and phi to NaN for blinks
-    df.loc[df["blink"] == 1, "theta"] = np.nan
-    df.loc[df["blink"] == 1, "phi"] = np.nan
-    df.loc[df["blink"] == 1, "r"] = np.nan
-    df.loc[df["blink"] == 1, "diameter_left"] = np.nan
-    df.loc[df["blink"] == 1, "diameter_right"] = np.nan
-
-    # interpolate the data for the blinks
-    df["theta"] = df["theta"].interpolate(method="linear")
-    df["phi"] = df["phi"].interpolate(method="linear")
-    df["r"] = df["r"].interpolate(method="linear")
-    df["diameter_right"] = df["diameter_right"].interpolate(method="linear")
-    df["diameter_left"] = df["diameter_left"].interpolate(method="linear")
-
-    return df
 
 
 def decode_core(X, y, groups, scoring="roc_auc", temp_gen=False, n_cv_folds=5, cv_random_state=None):
@@ -173,9 +78,12 @@ def decode_et(df, sub_id, factor, contrast, scoring, reps=50):
 
 def main(sub_nr: int):
     paths = PATHS()
-    sub_list_str_et = [f.split("-")[0] for f in os.listdir(paths.DATA_ET_PREPROC)]
+    pattern = "preproc.csv"
+    sub_list_str_et = [f for f in os.listdir(paths.DATA_ET_PREPROC) if pattern in f]
+    sub_list_str_et = [f.split("-")[0] for f in sub_list_str_et]
+    sub_list_str_et = np.unique(sorted(sub_list_str_et))
 
-    cond_dict = {
+    cond_dict = {  # noqa: F841
         "viewcond": {1: "mono", 2: "stereo"},
         "emotion": {1: "neutral", 2: "happy", 3: "angry", 4: "surprised"},
         "avatar_id": {1: "Woman_01", 2: "Woman_04", 3: "Woman_08"},
@@ -192,12 +100,19 @@ def main(sub_nr: int):
 
     # select only columns phi and theta
     df_s = df_all[["times", "theta", "phi", "viewcond", "avatar_id", "emotion", "sub_id", "trial_num"]]
-    factor = "avatar_id"  # 'viewcond'  # 'emotion'
+    factor = "avatar_id"  # "viewcond"  #  "emotion"  #
     scoring = "roc_auc_ovr"  # _ovr'
     contrasts = [
         tuple(cond_dict["avatar_id"].values())
-    ]  # [("mono", "stereo")]  # [("surprised", "neutral", "angry", "happy")]
-    # [('angry', 'neutral'), ('happy', 'neutral'), ('angry', 'surprised')]
+    ]
+        
+    # ("mono", "stereo")
+
+    # tuple(cond_dict["emotion"].values())
+
+    # ("angry", "neutral"),  ("angry", "surprised"), ("angry", "happy"),
+    #     ("happy", "neutral"), ("happy", "surprised"),
+    #     ("surprised", "neutral")
 
     scores_all = defaultdict(list)
     times_all = defaultdict(list)
@@ -219,8 +134,7 @@ def main(sub_nr: int):
             conditions_vc = ""
 
             path_save = Path(
-                paths.DATA_04_DECOD_SENSORSPACE,
-                "ET",
+                paths.DATA_ET_DECOD,
                 conditions_vc,
                 contrast_str,
                 scoring,
