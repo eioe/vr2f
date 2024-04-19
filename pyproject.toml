@@ -180,6 +180,7 @@ lint.ignore = [
     "S301",   # suspicious-pickle-usage
     "TD002",  # Missing author in To-Do
     "TD003",  # Missing issue link on the line following a To-Do
+    "RET504", # Unnecessary variable assignments preceding a return
 ]
 
 lint.ignore-init-module-imports = true # void automatically removing unused imports in __init__.py
