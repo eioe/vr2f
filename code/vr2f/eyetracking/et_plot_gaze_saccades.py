@@ -16,6 +16,8 @@ def get_data_sub_trialnum(df_data, sub_id, trial_num):  # noqa: ARG001
     df_data_sub = (df_data
                     .query("sub_id == @sub_id")
                     .query("trial_num == @trial_num")
+                    .drop(columns=["level_0"])
+                    .reset_index()
     )
     return df_data_sub
 
@@ -87,8 +89,8 @@ def plot_gaze_sacc_per_trial(data, sub_id, trial_range, min_sac_amp = 1, sfreq =
     sac["amp_tot"] = np.sqrt(sac["amp_x"]**2 + sac["amp_y"]**2)
     times = df_st["times"]
 
-    df_st["phi"][df_st["blink"]] = 0
-    df_st["theta"][df_st["blink"]] = 0
+    df_st.loc[df_st["blink"], ["phi"]] = 0
+    df_st.loc[df_st["blink"], ["theta"]] = 0
     # flip phi for more intuitive plotting:
     df_st["phi"] = df_st["phi"] * -1
 
