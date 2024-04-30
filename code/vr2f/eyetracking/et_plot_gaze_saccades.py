@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 
-from vr2f.eyetracking import ms_toolbox
+from vr2f.eyetracking import ms_toolbox, et_utils
 from vr2f.staticinfo import COLORS, CONSTANTS, PATHS
 
 
@@ -83,7 +83,9 @@ def plot_gaze_sacc_per_trial(data, sub_id, trial_range, min_sac_amp = 1, sfreq =
 
   for i, trial_idx in enumerate(trial_range):
     df_st = get_data_sub_trialnum(df_in, sub_id, trial_idx)
-
+    if df_st.empty:
+      print(f"!!! Warning: No data for {sub_id} and trial {trial_idx}. Skipping this trial.")
+      continue
     data = df_st.loc[:,["theta", "phi"]].to_numpy()
     sac, rad = ms_toolbox.microsacc(data, sfreq, vfac=vfac, mindur=mindur)
     sac["amp_tot"] = np.sqrt(sac["amp_x"]**2 + sac["amp_y"]**2)

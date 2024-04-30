@@ -116,4 +116,9 @@ class CONSTANTS:
             "emotion": {1: "neutral", 2: "happy", 3: "angry", 4: "surprised"},
             "avatar_id": {1: "Woman_01", 2: "Woman_04", 3: "Woman_08"},
             }
+        self.ET_SACC_VFAC = 5
+        self.ET_SACC_MINDUR = 3  # in samples
+        self.ET_SACC_MINAMP = 2  # in dva
+        self.ET_FIX_MINDUR = 0.05  # in s
+        
 
