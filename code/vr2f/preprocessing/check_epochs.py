@@ -1,5 +1,5 @@
 """
-Check and clean raw epoch files
+Check and clean raw epoch files.
 
 Open up each epoch file once and do some checks:
 - does the ERP (across all chans) look healthy
@@ -12,16 +12,15 @@ import os
 import sys
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import mne
 import numpy as np
-import pandas as pd
+
+from vr2f import helpers
 from vr2f.staticinfo import CONFIG, PATHS, TIMINGS
-from vr2fem_analyses import helpers, preprocess
-from vr2fem_analyses.staticinfo import TIMINGS
 
 
-def main(sub_nr: int = None):
+def main(sub_nr: int | None = None):
+    """Run main."""
     paths = PATHS()
     timings = TIMINGS()
     config = CONFIG()
@@ -32,8 +31,8 @@ def main(sub_nr: int = None):
     if sub_nr is not None:
         sub_list_str = [sub_list_str[sub_nr]]
 
-    for subID in sub_list_str:
-        fname = Path(paths.DATA_01_EPO, "erp", f"{subID}-epo.fif")
+    for sub_id in sub_list_str:
+        fname = Path(paths.DATA_01_EPO, "erp", f"{sub_id}-epo.fif")
         epochs = mne.read_epochs(fname)
 
         freq_res = 1
@@ -61,17 +60,17 @@ def main(sub_nr: int = None):
         # save:
         fpath = Path(paths.DATA_01_EPO, "erp", "clean")
         fpath.mkdir(exist_ok=True)
-        fname = Path(fpath, f"{subID}-epo.fif")
+        fname = Path(fpath, f"{sub_id}-epo.fif")
         epochs.save(fname, overwrite=True)
 
         # now also reject those chans from the copy for the ICA
-        fname_ica = Path(paths.DATA_01_EPO, "ica", f"{subID}-epo.fif")
+        fname_ica = Path(paths.DATA_01_EPO, "ica", f"{sub_id}-epo.fif")
         epochs_ica = mne.read_epochs(fname_ica)
         epochs_ica.info["bads"] = bads
         epochs_ica.interpolate_bads(reset_bads=True)
         fpath_ica = Path(paths.DATA_01_EPO, "ica", "clean")
         fpath_ica.mkdir(exist_ok=True)
-        fname_ica = Path(fpath_ica, f"{subID}-epo.fif")
+        fname_ica = Path(fpath_ica, f"{sub_id}-epo.fif")
         epochs_ica.save(fname_ica, overwrite=True)
 
 
