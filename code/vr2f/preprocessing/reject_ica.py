@@ -129,9 +129,9 @@ def main(sub_nr: int | None = None):
         exclude = list(np.unique(indices_veog + indices_heog))
 
         ica.exclude = exclude
-
+        
         ica.plot_components(range(0, 32), inst=data_ica)
-        ica.plot_components(range(32, 64), inst=data_ica)
+        ica.plot_components(range(32, ica.n_components_), inst=data_ica)
 
         ica.plot_sources(inst=data_ica)
 
