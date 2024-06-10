@@ -9,7 +9,11 @@ def spherical2cart(theta, phi, input_in_degree=False):
   z = np.cos(theta) * np.cos(phi)
   return x, y, z
 
-def gazevec_intersec_xyplane(vec, z):
+def gazevec_intersec_xyplane(vec, z, tolerance=1e-12):
+  if (vec[2] < 0):
+    raise ValueError("Gaze vector must be pointing forward.")
+  if (vec[2] < tolerance):
+    raise ValueError("Gaze vector is parallel to the xy-plane.")
   r = z / vec[2]
   x = r * vec[0]
   y = r * vec[1]
