@@ -26,4 +26,4 @@ module load mkl
 conda activate vr2fem
  
 # Run the program: 
-srun python3.10 ./vr2f/code/vr2f/eyetracking/et_decoding.py $SLURM_ARRAY_TASK_ID
+srun python3.10 ./vr2f/code/vr2f/eyetracking/et_decoding.py $SLURM_ARRAY_TASK_ID all

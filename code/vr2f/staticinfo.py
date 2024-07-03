@@ -91,7 +91,7 @@ class COLORS:
 
     def __init__(self) -> None:
         """Initialize color values."""
-        self.COLDICT = {
+        base_colors = {
             "all": "#003049",
             "mono": "#9BC1BC",  # "#d62828",
             "stereo": "#4BA3C3",  # "#f77f00",
@@ -100,7 +100,17 @@ class COLORS:
             "angry": "#840032",
             "neutral": "#002642",
             "surprised": "#E59500",
+            "angry_vs_happy": "#F18F01",
+            "angry_vs_surprised": "#FF4D80",
+            "happy_vs_surprised": "#B89685",
         }
+        self.COLDICT = base_colors
+        self.COLDICT.update({
+            "neutral_vs_happy_vs_angry_vs_surprised": self.COLDICT["all"],
+            "angry_vs_neutral": self.COLDICT["angry"],
+            "happy_vs_neutral": self.COLDICT["happy"],
+            "surprised_vs_neutral": self.COLDICT["surprised"]
+        })
 
 class CONSTANTS:
     """Store constant values."""
@@ -120,5 +130,7 @@ class CONSTANTS:
         self.ET_SACC_MINDUR = 3  # in samples
         self.ET_SACC_MINAMP = 2  # in dva
         self.ET_FIX_MINDUR = 0.05  # in s
+        # participants with higher proportion of rejected epochs will be excluded:
+        self.AR_PROP_EPOS_TO_REJECT_SUB = 0.2
         
 

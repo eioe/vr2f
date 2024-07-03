@@ -240,17 +240,17 @@ known-local-folder = ["code/vr2f"]
 max-complexity = 10 # default x: 10
 
 [tool.ruff.lint.pep8-naming]
-ignore-names = [] # fill with specific class, function, variable names
+ignore-names = ["X"] # fill with specific class, function, variable names
 
 [tool.ruff.lint.pydocstyle]
-# convention = "google"  # "numpy", "pep257"
+# convention = "numpy" # "google"  # , "pep257"
 
 [tool.ruff.lint.pylint]
-max-args = 5          # default: 5
+max-args = 10          # default: 5
 max-branches = 12     # default: 12
 max-locals = 15       # default: 15
 max-returns = 6       # default: 6
-max-statements = 50   # default: 50
+max-statements = 100   # default: 50
 max-nested-blocks = 5 # default: 5
 # allow-magic-value-types = ["int"]
 

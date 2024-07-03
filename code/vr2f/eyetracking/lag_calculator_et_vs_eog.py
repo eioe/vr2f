@@ -15,6 +15,7 @@ import mne
 import numpy as np
 import pandas as pd
 from scipy.signal import correlate, correlation_lags
+from tqdm.auto import tqdm
 
 from vr2f.helpers import chkmkdir
 from vr2f.staticinfo import CONSTANTS, PATHS
@@ -105,7 +106,7 @@ class LagCalculatorEyetrackingVsEog:
 
     et_eog_dfs= []
 
-    for trial_idx in trial_range:
+    for trial_idx in tqdm(trial_range):
       eog_vert = -1 * ((d_fp1 - d_io1) + (d_fp2 - d_io2)) / 2
       eog_vert = eog_vert.squeeze()[trial_idx, :]
       eog_vert = self.zscore_array(eog_vert, axis=0)
