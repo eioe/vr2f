@@ -1,6 +1,6 @@
 #!/bin/bash -l 
 # specify the indexes of the job array elements
-#SBATCH --array=0-32
+#SBATCH --array=0-19
 # Standard output and error: 
 #SBATCH -o ./job.out.%j        # Standard output, %A = job ID, %a = job array index 
 #SBATCH -e ./job.err.%j        # Standard error, %A = job ID, %a = job array index 
@@ -23,7 +23,7 @@
  
 module load anaconda/3/2023.03
 module load mkl
-conda activate vr2f_3.11
+conda activate vr2fem
  
 # Run the program: 
-srun python3.11 ./vrstereofem_analysis/Pipeline/02_decoding/02-1_sensorspace.py $SLURM_ARRAY_TASK_ID
+srun python3.10 ./vr2f/code/vr2f/decoding/decoding.py $SLURM_ARRAY_TASK_ID avatar_id all
