@@ -60,6 +60,10 @@ class TIMINGS:
     def __init__(self) -> None:
         """Initialize timing parameters."""
         self.DUR_BL = 0.2
+        self.ERP_WINDOWS = dict(P1 = (0.08, 0.12),
+                                N170 = (0.13, 0.2),
+                                EPN = (0.25, 0.3),
+                                LPC = (0.4, 0.6))
 
     def get_timing(self, key: str) -> float:
         """
@@ -102,8 +106,14 @@ class COLORS:
             "neutral": "#002642",
             "surprised": "#E59500",
             "angry_vs_happy": "#F18F01",
-            "angry_vs_surprised": "#FF4D80",
+            "angry_vs_surprised": "#F1A028",
             "happy_vs_surprised": "#B89685",
+            "mono_vs_stereo": "#FFD662",
+            "id1_vs_id2_vs_id3": "#FFD662",
+            "P1": "#b3cde0",
+            "N170": "#6497b1",
+            "EPN": "#005b96",
+            "LPC": "#03396c",
         }
         self.COLDICT = base_colors
         self.COLDICT.update({

@@ -88,7 +88,7 @@ def plot_gaze_sacc_per_trial(data, sub_id, trial_range, min_sac_amp = 1, sfreq =
       continue
     data = df_st.loc[:,["theta", "phi"]].to_numpy()
     sac, rad = ms_toolbox.microsacc(data, sfreq, vfac=vfac, mindur=mindur)
-    sac["amp_tot"] = np.sqrt(sac["amp_x"]**2 + sac["amp_y"]**2)
+    sac["amp_tot"] = np.sqrt(sac["vec_x"]**2 + sac["vec_y"]**2)
     times = df_st["times"]
 
     df_st.loc[df_st["blink"], ["phi"]] = 0

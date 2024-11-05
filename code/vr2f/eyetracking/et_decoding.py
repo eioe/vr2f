@@ -1,4 +1,5 @@
 """Run eye tracking decoding."""
+import multiprocessing as mp
 import os
 import sys
 from collections import defaultdict
@@ -125,7 +126,7 @@ def decode_et(df, sub_id, factor, contrast, scoring, reps=50):  # noqa: ARG001
     data_long["theta"] = data_long["theta"].interpolate(method="linear")
 
     # throw away trials which still contain nan values
-    times = data.groupby("times_idx").mean()["times"].to_numpy()
+    times = data.groupby("times_idx")["times"].mean().to_numpy()
     idx_na = data_long.groupby("trial_num")["phi"].apply(lambda x: x.isna().sum() > 0).to_numpy()
     data_long = data_long[~np.repeat(idx_na, len(times))]
 
@@ -140,19 +141,33 @@ def decode_et(df, sub_id, factor, contrast, scoring, reps=50):  # noqa: ARG001
     y = data.query("times_idx == 0")[factor].to_numpy()
     y = y[~idx_na]
 
-    scores_tmp = []
+    # scores_tmp = []
     rng = np.random.default_rng(42)
     seeds = rng.integers(0, 1000, reps)
-    for i in range(reps):
-        score, _ = decode_core(
-            X, y, groups=None, temp_gen=False, n_cv_folds=5, scoring=scoring, cv_random_state=seeds[i]
-        )
-        scores_tmp.append(score)
-    scores = np.array(scores_tmp).mean(axis=0)
+
+    n_cv_folds = 5
+
+    with(mp.Pool(reps)) as pool:
+        tmp_scores = pool.starmap(run_decode_core, [(X, y, scoring, n_cv_folds, seed) for seed in seeds])
+
+    scores = np.array([s[0] for s in tmp_scores]).mean(axis=0)
+
+    # for i in range(reps):
+    #     score, _ = decode_core(
+    #         X, y, groups=None, temp_gen=False, n_cv_folds=5, scoring=scoring, cv_random_state=seeds[i]
+    #     )
+    #     scores_tmp.append(score)
+    # scores = np.array(scores_tmp).mean(axis=0)
     return scores, times
 
 
-def main(sub_nr: int, contrast_arg: str = "all"):
+def run_decode_core(X, y, scoring, n_cv_folds, seed):
+    return decode_core(
+        X, y, groups=None, temp_gen=False, n_cv_folds=n_cv_folds, scoring=scoring, cv_random_state=seed
+    )
+
+
+def main(sub_nr: int, contrast_arg: str = "all", viewcond: str = ""):
     """Run main."""
     scoring = "roc_auc_ovr"
     save_scores = True
@@ -195,6 +210,10 @@ def main(sub_nr: int, contrast_arg: str = "all"):
     # select only relevant columns
     df_s = df_all[["times", "theta", "phi", "viewcond", "avatar_id", "emotion", "sub_id", "trial_num"]]
 
+    if viewcond != "":
+        df_s = df_s.query("viewcond == @viewcond")
+        contrasts_dict.pop("viewcond") # cannot decode viewcond if only one is present
+
     # set up contrasts
     if contrast_arg == "all":
         contrasts = []
@@ -208,7 +227,7 @@ def main(sub_nr: int, contrast_arg: str = "all"):
                 factors.append(c)
         contrasts = tuple(contrasts)
     elif contrast_arg in contrasts_dict:
-        contrasts = tuple(contrasts_dict[contrast_arg])
+        contrasts = tuple((contrasts_dict[contrast_arg],))
         factors = [contrast_arg]
     else:
         raise ValueError(f"Contrast argument {contrast_arg} not found in contrasts_dict.")
@@ -222,14 +241,16 @@ def main(sub_nr: int, contrast_arg: str = "all"):
 
     for contrast, factor in zip(contrasts, factors, strict=True):
         for sub_id in sorted(sub_list_str_et):
-            print("Running subject: ", sub_id)
+            print(f"Running subject: {sub_id} - factor: {factor} - contrast: {contrast}")
             score, times = decode_et(df_s, sub_id, factor=factor, contrast=contrast, scoring=scoring, reps=50)
             scores_all[sub_id].append(score)
             times_all[sub_id].append(times)
 
             # save
             contrast_str = "_vs_".join([c.lower() for c in contrast])
-            conditions_vc = ""
+            if contrast_str.startswith("woman"):
+                contrast_str = "id1_vs_id2_vs_id3"  # to match eeg decoding data
+            conditions_vc = viewcond
 
             path_save = Path(
                 paths.DATA_ET_DECOD,
@@ -248,6 +269,8 @@ def main(sub_nr: int, contrast_arg: str = "all"):
 
 
 if __name__ == "__main__":
+    VIEWCOND = sys.argv[3] if len(sys.argv) > 3 else ""  # noqa: PLR2004
+
     CONTRAST = sys.argv[2] if len(sys.argv) > 2 else "all"  # noqa: PLR2004
 
     if len(sys.argv) > 1:
@@ -256,4 +279,4 @@ if __name__ == "__main__":
     else:
         JOB_NR = None
 
-    main(JOB_NR, CONTRAST)
+    main(JOB_NR, CONTRAST, VIEWCOND)

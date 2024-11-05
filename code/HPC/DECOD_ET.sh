@@ -23,7 +23,7 @@
  
 module load anaconda/3/2023.03
 module load mkl
-conda activate vr2fem
+conda activate vr2fem_env
  
 # Run the program: 
-srun python3.10 ./vr2f/code/vr2f/eyetracking/et_decoding.py $SLURM_ARRAY_TASK_ID all
+srun python3.10 ./vr2f/code/vr2f/eyetracking/et_decoding.py $SLURM_ARRAY_TASK_ID all mono
