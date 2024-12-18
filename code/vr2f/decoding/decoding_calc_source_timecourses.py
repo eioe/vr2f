@@ -1,7 +1,8 @@
 import multiprocessing as mp
-import os.path as op
 import os
+import os.path as op
 import sys
+import warnings
 from pathlib import Path
 
 import mne
@@ -12,68 +13,8 @@ from mne import EvokedArray
 from mne.datasets import fetch_fsaverage
 
 from vr2f import helpers
+from vr2f.decoding.plotters import load_patterns
 from vr2f.staticinfo import COLORS, CONFIG, PATHS
-
-
-def load_patterns(
-    sub_list_str,
-    contrast_str,
-    viewcond="",
-    scoring="accuracy",
-    reg="",
-    labels_shuffled=False,
-):
-    """
-    Load the patterns from sensor space decoding.
-
-    Parameters
-    ----------
-    sub_list_str : list, str
-        List of subject IDs to load patterns from.
-    contrast_str : str
-        Decoded contrast.
-    viewcond : str
-        Viewing condition. 'mono', 'stereo', or ''(default) for data pooled across both viewing conditions.
-    scoring: str
-        Scoring metric used during decoding. "roc_auc", accuracy" (default), or "balanced_accuracy";
-    reg: str, float
-        Regularization method used; Ints are interpreted as fixed shrinkage values; defaults to an empty string
-    labels_shuffled : bool
-        Allows to load the data from the run with shuffled labels.
-
-
-    Returns
-    -------
-    patterns: ndarray
-        Array with the patterns (subs x csp_components x channels x freqs x times)
-    times: array, 1d
-
-    """
-    paths = PATHS()
-
-    if isinstance(reg, float):
-        reg_str = "shrinkage" + str(reg)
-    else:
-        reg_str = reg
-    shuf_labs = "labels_shuffled" if labels_shuffled else ""
-
-    patterns_list = []
-    times = []
-
-    for subID in sub_list_str:
-        fpath = Path(paths.DATA_04_DECOD_SENSORSPACE, viewcond, contrast_str, scoring, "patterns")
-        fname = op.join(fpath, f"{subID}-patterns_per_sub.npy")
-        patterns_ = np.load(fname)
-        patterns_list.append(patterns_)
-        if len(times) == 0:
-            times = np.load(str(fname)[:-4] + "__times" + ".npy")
-        else:
-            assert np.all(
-                times == np.load(str(fname)[:-4] + "__times" + ".npy")
-            ), "Times are different between subjects."
-
-    patterns = np.concatenate(patterns_list)
-    return patterns, times
 
 
 def get_info(return_inst=False):
@@ -108,7 +49,6 @@ def get_epos(subID):
 def l2norm(vec):
     out = np.sqrt(np.sum(vec**2))
     return out
-
 
 
 def get_fsavg_src(from_disk=False):  # noqa: D103
@@ -164,9 +104,19 @@ def get_inv_operator(fwd, epos, pattern_times):
     return inv_op, info
 
 
-def get_src_timecourse(sub_id, contrast, pattern, pattern_times, inv_op, info, from_disk=False):
+def get_src_timecourse(sub_id, contrast, pattern, pattern_times, inv_op, info,
+                       viewcond="", from_disk=False, mc_contrast=""):
     paths = PATHS()
-    fpath = Path(paths.DATA_04_DECOD_SENSORSPACE, contrast, "roc_auc_ovr", "patterns", "src_timecourses", f"{sub_id}")
+    mc_dir = "multiclass" if mc_contrast else ""
+    fpath = Path(paths.DATA_04_DECOD_SENSORSPACE,
+                 viewcond,
+                 contrast,
+                 "roc_auc_ovr",
+                 "patterns",
+                 "src_timecourses",
+                 mc_dir,
+                 mc_contrast,
+                 f"{sub_id}")
     Path.mkdir(fpath.parent, parents=True, exist_ok=True)
     if not from_disk:
         sub_pattern_src = EvokedArray(pattern, info, tmin=pattern_times[0])
@@ -187,7 +137,42 @@ def get_src_timecourse(sub_id, contrast, pattern, pattern_times, inv_op, info, f
     return stc
 
 
-def process_sub(sub_id, contrast, sub_pattern, pat_times):
+def get_src_timecourse_multiclass(sub_id, contrast, pattern, pattern_times, inv_op, info,
+                                  viewcond="", from_disk=False):
+    paths = PATHS()
+    stcs = []
+    for i in range(pattern.shape[-2]):
+        pattern_ = pattern[:, i, :].squeeze()
+        emos = contrast.split("_vs_")
+        stc_ = get_src_timecourse(sub_id,
+                           contrast,
+                           pattern_,
+                           pattern_times,
+                           inv_op,
+                           info,
+                           viewcond=viewcond,
+                           from_disk=from_disk,
+                           mc_contrast=f"{emos[i]}_vs_rest")
+        stcs.append(stc_)
+    data_ = np.stack([stc.data for stc in stcs])
+    stc = stc_.copy()
+    stc.data = data_.mean(axis=0)
+    fpath = Path(paths.DATA_04_DECOD_SENSORSPACE,
+                 viewcond,
+                 contrast,
+                 "roc_auc_ovr",
+                 "patterns",
+                 "src_timecourses",
+                 "multiclass",
+                 "ovr_avg",
+                 f"{sub_id}",
+                 )
+    Path.mkdir(fpath.parent, parents=True, exist_ok=True)
+    stc.save(fpath, overwrite=True)
+    return stc
+
+
+def process_sub(sub_id, contrast, sub_pattern, pat_times, viewcond=""):
     # Get the source space and the forward solution (needs to be done only once)
     src = get_fsavg_src(from_disk=True)
     epos = get_epos(sub_id)
@@ -195,48 +180,55 @@ def process_sub(sub_id, contrast, sub_pattern, pat_times):
     fwd = get_fwd_solution(src, info, from_disk=True)  # takes a long time if not read from disc
     info = create_fake_info(epos, pat_times)
     inv_op, info = get_inv_operator(fwd, epos, pat_times)
-    stc = get_src_timecourse(sub_id, contrast, sub_pattern, pat_times, inv_op, info, from_disk=False)
+    if sub_pattern.ndim == 3 and len(contrast.split("_vs_")) > 2:
+        print(f"Processing {sub_id} for multiclass contrast {contrast}")
+        stc = get_src_timecourse_multiclass(sub_id, contrast, sub_pattern, pat_times, inv_op, info,
+                                            viewcond=viewcond, from_disk=False)
+    else:
+        stc = get_src_timecourse(sub_id, contrast, sub_pattern, pat_times, inv_op, info,
+                                 viewcond=viewcond, from_disk=False)
     return stc
-
 
 
 def main(sub_nr):
 
-  contrasts = ["mono_vs_stereo",
+    contrasts = ["neutral_vs_happy_vs_angry_vs_surprised",
+               "id1_vs_id2_vs_id3",
+               "mono_vs_stereo",
                "angry_vs_happy",
                "angry_vs_neutral",
                "angry_vs_surprised",
                "happy_vs_neutral",
                "happy_vs_surprised",
                "surprised_vs_neutral",
-               ]
-  for contrast in contrasts:
-    paths = PATHS()
-    path_in = Path(paths.DATA_04_DECOD_SENSORSPACE, contrast, "roc_auc_ovr", "patterns")
-    sub_list_str = [s.split("-patterns_per")[0] for s in os.listdir(path_in)]
-    sub_list_str = np.unique(sub_list_str)  # remove duplicates because there are two files per subject
-    sub_list_str = sorted(sub_list_str, reverse=False)
+            ]
+    viewconds = ["mono", "stereo"]  # ""
 
-    if sub_nr is not None:
-        sub_list_str = [sub_list_str[sub_nr]]
+    for vc in viewconds:
+        for contrast in contrasts:
+            if vc in ["mono", "stereo"] and contrast == "mono_vs_stereo":
+                continue
+            paths = PATHS()
+            path_in = Path(paths.DATA_04_DECOD_SENSORSPACE, contrast, "roc_auc_ovr", "patterns")
+            sub_list_str = [s.split("-patterns_per")[0] for s in path_in.iterdir() if s.is_file()]
+            sub_list_str = np.unique(sub_list_str)  # remove duplicates because there are two files per subject
+            sub_list_str = sorted(sub_list_str, reverse=False)
 
-    sub_patterns, pat_times = load_patterns(
-        sub_list_str,
-        contrast_str=contrast,  # "mono_vs_stereo",  #'surprised_vs_neutral_vs_angry_vs_happy',  #   #
-        viewcond="",  # "stereo",  # "mono", # ,
-        scoring="roc_auc_ovr",
-        reg="",
-        labels_shuffled=False,
-    )
+            if sub_nr is not None:
+                sub_list_str = [sub_list_str[sub_nr]]
 
-    if len(sub_patterns.shape) > 3:
-        raise ValueError("source reconstruction for multiclass needs separate implementation.")
+            sub_patterns, pat_times = load_patterns(
+                sub_list_str,
+                contrast_str=contrast,  # "mono_vs_stereo",  #'surprised_vs_neutral_vs_angry_vs_happy',  #   #
+                viewcond=vc,  # "",  # "mono", # ,
+                scoring="roc_auc_ovr",
+                )
 
-    if len(sub_list_str) == 1:
-        process_sub(sub_list_str[0], contrast, sub_patterns[0], pat_times)
-    else:
-        for sub_id, sub_pattern in zip(sub_list_str, sub_patterns, strict=True):
-            process_sub(sub_id, contrast, sub_pattern, pat_times)
+            if len(sub_list_str) == 1:
+                process_sub(sub_list_str[0], contrast, sub_patterns[0], pat_times, viewcond=vc)
+            else:
+                for sub_id, sub_pattern in zip(sub_list_str, sub_patterns, strict=True):
+                    process_sub(sub_id, contrast, sub_pattern, pat_times, viewcond=vc)
 
 
 

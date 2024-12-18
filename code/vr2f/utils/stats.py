@@ -5,9 +5,9 @@ import numpy as np
 from scipy import stats
 
 
-def l2norm(vec):
+def l2norm(vec, axis=None):
     """Compute the L2 norm of a vector."""
-    out = np.sqrt(np.sum(vec**2))
+    out = np.sqrt(np.sum(vec**2, axis=axis))
     return out
 
 

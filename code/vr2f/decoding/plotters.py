@@ -115,6 +115,110 @@ def load_decod_res_per_viewcond(
     return data_dict
 
 
+def load_decod_res_crossdecod_viewcond(
+    sub_list_str,
+    conditions,
+    vc_train_list=None,
+    vc_test_list=None,
+    scoring="roc_auc_ovr",
+    picks_str=None,
+    gen_str=None,
+):
+    """
+    Load decoding results per viewing condition for a set of subjects and conditions.
+
+    This function loads scores, times, and patterns associated with decoding results for
+    each specified viewing condition. Data for each condition and subject is stored in
+    a nested dictionary.
+
+    Parameters
+    ----------
+    sub_list_str : list of str
+        List of subject identifiers as strings, e.g., ['sub01', 'sub02'].
+    conditions : list of str
+        List of conditions to contrast (i.e., the decoding target classes), e.g., ['angry', 'neutral'].
+    vc_list : list of str, optional
+        List of viewing conditions to load, e.g. ["mono", "stereo"]. If empty, defaults to [""].
+        "" (empty string) loads data pooled across viewing conditions.
+    scoring : str, optional
+        Metric used to score decoding results, by default "roc_auc_ovr".
+    picks_str : str, optional
+        String identifier for channel or sensor selections used during decoding. Defaults to None.
+    gen_str : str, optional
+        String identifier for generalization parameters (i.e., temporal generalization). Defaults to None.
+
+    Returns
+    -------
+    dict
+        A dictionary where each key is a viewing condition from `vc_list`.
+        Each viewing condition maps to a dictionary with the following keys:
+
+        - 'scores' : ndarray
+            Array of decoding scores for each subject.
+        - 'times' : ndarray
+            Array of time points for decoding scores.
+        - 'patterns' : ndarray
+            Array of decoding patterns for each subject.
+
+    Notes
+    -----
+    - The function assumes a specific directory structure defined by the `PATHS` object.
+    - Decoding scores, times, and patterns are loaded from `.npy` files.
+    - Ensures that 'times' arrays are consistent across subjects for each viewing condition.
+
+    """
+    data_dict = {}
+    picks_str_folder = picks_str if picks_str is not None else ""
+    gen_folder = gen_str if gen_str is not None else ""
+
+    paths = PATHS()
+
+    contrast_str = "_vs_".join(conditions)
+
+    for vc_train in vc_train_list:
+        for vc_test in vc_test_list:
+            vc = f"train_{vc_train}-test_{vc_test}"
+            data_dict[vc] = dict(scores=[], times=[], patterns=[])
+            for sub_id in sub_list_str:
+                fpath = Path(
+                    paths.DATA_04_DECOD_SENSORSPACE,
+                    "cross_decod_vc",
+                    vc,
+                    contrast_str,
+                    gen_folder,
+                    scoring,
+                    picks_str_folder,
+                    "scores",
+                )
+                fname = Path(fpath, f"{sub_id}-scores_per_sub.npy")
+                scores_ = np.load(fname)
+                data_dict[vc]["scores"].append(scores_)
+
+                if len(data_dict[vc]["times"]) == 0:
+                    data_dict[vc]["times"] = np.load(str(fname)[:-4] + "__times" + ".npy")
+                elif not np.all(data_dict[vc]["times"] == np.load(str(fname)[:-4] + "__times" + ".npy")):
+                    raise ValueError("Times are different between subjects.")
+
+                fpath = Path(
+                    paths.DATA_04_DECOD_SENSORSPACE,
+                    "cross_decod_vc",
+                    vc,
+                    contrast_str,
+                    gen_folder,
+                    scoring,
+                    picks_str_folder,
+                    "patterns",
+                )
+                fname = Path(fpath, f"{sub_id}-patterns_per_sub.npy")
+                patterns_ = np.load(fname)
+                data_dict[vc]["patterns"].append(patterns_)
+
+            data_dict[vc]["scores"] = np.array(data_dict[vc]["scores"])
+            data_dict[vc]["patterns"] = np.array(data_dict[vc]["patterns"])
+
+    return data_dict
+
+
 def load_patterns(
     sub_list_str,
     contrast_str,
@@ -139,7 +243,9 @@ def load_patterns(
     Returns
     -------
     patterns: ndarray
-        Array with the patterns (subs x csp_components x channels x freqs x times)
+        Array with the patterns (subs x channels x (OvR contrasts) x times)
+        OvR contrast: for multiclass classification with the OvR scheme we get n_classes contrasts;
+        for binary contrasts, this axis is reduced.
     times: array, 1d
 
     """
