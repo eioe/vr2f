@@ -155,7 +155,12 @@ def get_src_timecourse_multiclass(sub_id, contrast, pattern, pattern_times, inv_
                            mc_contrast=f"{emos[i]}_vs_rest")
         stcs.append(stc_)
     data_ = np.stack([stc.data for stc in stcs])
+    # normalize per sub-contrast and timepoint:
+    sums = np.sum(data_, axis=1, keepdims=True)
+    data_ = data_ / sums
+    # use last one as template:
     stc = stc_.copy()
+    # average across sub-contrasts:
     stc.data = data_.mean(axis=0)
     fpath = Path(paths.DATA_04_DECOD_SENSORSPACE,
                  viewcond,
@@ -194,15 +199,15 @@ def main(sub_nr):
 
     contrasts = ["neutral_vs_happy_vs_angry_vs_surprised",
                "id1_vs_id2_vs_id3",
-               "mono_vs_stereo",
-               "angry_vs_happy",
-               "angry_vs_neutral",
-               "angry_vs_surprised",
-               "happy_vs_neutral",
-               "happy_vs_surprised",
-               "surprised_vs_neutral",
+            #    "mono_vs_stereo",
+            #    "angry_vs_happy",
+            #    "angry_vs_neutral",
+            #    "angry_vs_surprised",
+            #    "happy_vs_neutral",
+            #    "happy_vs_surprised",
+            #    "surprised_vs_neutral",
             ]
-    viewconds = ["mono", "stereo"]  # ""
+    viewconds = ["mono", "stereo", ""]  # ""
 
     for vc in viewconds:
         for contrast in contrasts:
@@ -210,7 +215,7 @@ def main(sub_nr):
                 continue
             paths = PATHS()
             path_in = Path(paths.DATA_04_DECOD_SENSORSPACE, contrast, "roc_auc_ovr", "patterns")
-            sub_list_str = [s.split("-patterns_per")[0] for s in path_in.iterdir() if s.is_file()]
+            sub_list_str = [str(s.name).split("-patterns_per")[0] for s in path_in.iterdir() if s.is_file()]
             sub_list_str = np.unique(sub_list_str)  # remove duplicates because there are two files per subject
             sub_list_str = sorted(sub_list_str, reverse=False)
 
@@ -219,8 +224,8 @@ def main(sub_nr):
 
             sub_patterns, pat_times = load_patterns(
                 sub_list_str,
-                contrast_str=contrast,  # "mono_vs_stereo",  #'surprised_vs_neutral_vs_angry_vs_happy',  #   #
-                viewcond=vc,  # "",  # "mono", # ,
+                contrast_str=contrast,
+                viewcond=vc,
                 scoring="roc_auc_ovr",
                 )
 
