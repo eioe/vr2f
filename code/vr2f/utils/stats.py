@@ -76,3 +76,13 @@ def run_cbp_test(data, tail=0, nperm=10000):
 
     t_obs, clusters, cluster_p_values, _ = cluster_stats
     return t_obs, clusters, cluster_p_values
+
+
+def print_aov_results(aov_res):
+    print(aov_res)
+    for eff in aov_res.anova_table.index:  
+        num_df = int(aov_res.anova_table.loc[eff, "Num DF"])
+        den_df = int(aov_res.anova_table.loc[eff, "Den DF"])
+        f_value = aov_res.anova_table.loc[eff, "F Value"]
+        p_value = aov_res.anova_table.loc[eff, "Pr > F"]
+        print(f'F({num_df},{den_df}) = {f_value:.2f}, p {"< .001" if p_value < 0.001 else f"= {p_value:.3f}"}\n')
