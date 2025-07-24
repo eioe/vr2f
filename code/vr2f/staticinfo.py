@@ -105,9 +105,12 @@ class COLORS:
             "angry": "#840032",
             "neutral": "#002642",
             "surprised": "#E59500",
-            "angry_vs_happy": "#F18F01",
-            "angry_vs_surprised": "#F1A028",
-            "happy_vs_surprised": "#B89685",
+            "angry_vs_happy": "#1A7AE6",
+            "angry_vs_surprised": "#2C7B85",
+            "angry_vs_neutral": "#840032",
+            "happy_vs_surprised": "#F1A028",
+            "happy_vs_neutral": "#8F26D9",
+            "surprised_vs_neutral": "#92E61A",
             "mono_vs_stereo": "#FFD662",
             "id1_vs_id2_vs_id3": "#FFD662",
             "train_mono-test_mono": "#9BC1BC",
@@ -121,10 +124,10 @@ class COLORS:
         }
         self.COLDICT = base_colors
         self.COLDICT.update({
-            "neutral_vs_happy_vs_angry_vs_surprised": self.COLDICT["all"],
-            "angry_vs_neutral": self.COLDICT["angry"],
-            "happy_vs_neutral": self.COLDICT["happy"],
-            "surprised_vs_neutral": self.COLDICT["surprised"]
+            # "neutral_vs_happy_vs_angry_vs_surprised": self.COLDICT["all"],
+            # "angry_vs_neutral": self.COLDICT["angry"],
+            # "happy_vs_neutral": self.COLDICT["happy"],
+            # "surprised_vs_neutral": self.COLDICT["surprised"]
         })
 
 class CONSTANTS:
