@@ -98,6 +98,7 @@ class COLORS:
         """Initialize color values."""
         base_colors = {
             "all": "#003049",
+            "neutral_vs_happy_vs_angry_vs_surprised": "#003049",
             "mono": "#9BC1BC",  # "#d62828",
             "stereo": "#4BA3C3",  # "#f77f00",
             "viewcond": "#588157",
