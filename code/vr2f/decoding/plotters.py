@@ -636,10 +636,13 @@ def get_max_decod_score_and_time(data_dict):
     peak_time_sd = np.std(times[data_dict["scores"].argmax(axis=1)]) * 1000
     peak_time_cil = peak_time - 1.96 * peak_time_sd / np.sqrt(len(data_dict["scores"]))
     peak_time_ciu = peak_time + 1.96 * peak_time_sd / np.sqrt(len(data_dict["scores"]))
+    time_mode = stats.mode(times[data_dict["scores"].argmax(axis=1)])
+    peak_time_mode = time_mode.mode * 1000
+    peak_time_mode_n = time_mode.count
     print(f"Peak mean: M = {peak_mean:.2f}, SD = {peak_sd:.2f}, 95% CI [{peak_cil:.2f}, {peak_ciu:.2f}]")
-    print(f"Peak time: M = {peak_time:.2f}, SD = {peak_time_sd:.2f}, 95% CI [{peak_time_cil:.2f}, "
+    print(f"Peak time: Mdn = {peak_time:.2f}, SD = {peak_time_sd:.2f}, 95% CI [{peak_time_cil:.2f}, "
                                                                             f"{peak_time_ciu:.2f}]")
-    return peak_mean, peak_sd, peak_cil, peak_ciu, peak_time, peak_time_sd, peak_time_cil, peak_time_ciu
+    return peak_mean, peak_sd, peak_cil, peak_ciu, peak_time, peak_time_sd, peak_time_cil, peak_time_ciu, peak_time_mode, peak_time_mode_n
 
 
 def get_decod_df(data_dict):
@@ -663,21 +666,25 @@ def get_binary_results(data_dict_na, contrast_str):
         ("Mono", "Peak", "cil"): res_mono[2],
         ("Mono", "Peak", "ciu"): res_mono[3],
         ("Mono", "Peak", "CI"): f"[{res_mono[2]:.2f}, {res_mono[3]:.2f}]",
-        ("Mono", "Time", "Mean"): res_mono[4],
+        ("Mono", "Time", "Median"): res_mono[4],
         ("Mono", "Time", "SD"): res_mono[5],
         ("Mono", "Time", "cil"): res_mono[6],
         ("Mono", "Time", "ciu"): res_mono[7],
         ("Mono", "Time", "CI"): f"[{res_mono[6]:.2f}, {res_mono[7]:.2f}]",
+        ("Mono", "Time", "Mode"): res_mono[8],
+        ("Mono", "Time", "Mode Count"): res_mono[9],
         ("Stereo", "Peak", "Mean"): res_stereo[0],
         ("Stereo", "Peak", "SD"): res_stereo[1],
         ("Stereo", "Peak", "cil"): res_stereo[2],
         ("Stereo", "Peak", "ciu"): res_stereo[3],
         ("Stereo", "Peak", "CI"): f"[{res_stereo[2]:.2f}, {res_stereo[3]:.2f}]",
-        ("Stereo", "Time", "Mean"): res_stereo[4],
+        ("Stereo", "Time", "Median"): res_stereo[4],
         ("Stereo", "Time", "SD"): res_stereo[5],
         ("Stereo", "Time", "cil"): res_stereo[6],
         ("Stereo", "Time", "ciu"): res_stereo[7],
         ("Stereo", "Time", "CI"): f"[{res_stereo[6]:.2f}, {res_stereo[7]:.2f}]",
+        ("Stereo", "Time", "Mode"): res_stereo[8],
+        ("Stereo", "Time", "Mode Count"): res_stereo[9],
         }
 
     # run paired t-test:
