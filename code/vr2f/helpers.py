@@ -35,3 +35,38 @@ def is_interactive():
     import __main__ as main
 
     return not hasattr(main, "__file__")
+
+
+def format_float(x, is_pval=False, rm_leading_zero=False):
+    """
+    Format a float as a string, with optional p-value formatting or leading zero removal.
+
+    Parameters
+    ----------
+    x : float
+        Number to format.
+    is_pval : bool, optional
+        If True, format as a p-value:
+        - Returns "< .001" if `x` < 0.001.
+        - Otherwise returns "= " followed by the value rounded to 3 decimal
+          places, with any leading zero removed.
+        Default is False.
+    rm_leading_zero : bool, optional
+        If True and `is_pval` is False, remove the leading zero from the
+        formatted number (e.g., "0.25" becomes ".25").
+        Default is False.
+
+    Returns
+    -------
+    str
+        Formatted number as a string.
+    """
+    
+    if is_pval:
+        string = "< .001" if x < 0.001 else "= " + f"{x:.3f}".lstrip("0")
+        return string
+    else:
+        string = f"{x:.2f}"
+        if rm_leading_zero:
+            string = string.lstrip("0")
+        return string

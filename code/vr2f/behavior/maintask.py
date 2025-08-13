@@ -3,7 +3,6 @@ Calculate behavioral confusion matrix.
 
 This script calculates the confusion matrix for the behavioral data of the main task.
 """
-#TODO: Add fig number to doc string
 
 import os
 from pathlib import Path
@@ -51,7 +50,7 @@ def get_confusion_matrix(sub_id, viewcond):
 
 # Plot confusion matrices
 
-def plot_confusion_matrix(cf_avg, viewcond, save_to_disk=True, figsize_factor=1):
+def plot_confusion_matrix(cf_avg, viewcond, save_to_disk=True, figsize_factor=1, show_numbers=True):
     emo_list = ["neutral", "happy", "angry", "surprised", "other"]
     paths = PATHS()
     cpal = sns.blend_palette(["darkblue", "green", "darkred"], n_colors=6000, as_cmap=True, input="rgb")
@@ -70,8 +69,8 @@ def plot_confusion_matrix(cf_avg, viewcond, save_to_disk=True, figsize_factor=1)
         square=True,
         xticklabels=emo_list,
         yticklabels=emo_list[:-1],
-        annot=viewcond == "all",
-        cbar=viewcond == "all",
+        annot=show_numbers,
+        cbar=show_numbers,
         ax=ax,
     )  # cmap=cpal)  #
     ax.tick_params(axis="y", labelrotation=45)
