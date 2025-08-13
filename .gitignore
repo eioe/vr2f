@@ -3,6 +3,11 @@
 # ignore Data folder recursively
 /Data
 
+## Cluster related
+# ignore dump files
+core.raven*
+
+
 ## R related stuuf (from https://github.com/github/gitignore/blob/master/R.gitignore)
 
 # History files
