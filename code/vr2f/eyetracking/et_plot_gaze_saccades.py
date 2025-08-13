@@ -179,7 +179,7 @@ if __name__ == "__main__":
     save_fig(myfig, sub_id, trial_range)
 
     # exp trials (in chunks to manage file size):
-    for i in range(25, 745, 30):
+    for i in range(25, 745, 30):  # first 24 trials were training
       trial_range = range(i, i + 30)
       myfig = plot_gaze_sacc_per_trial(df_all, sub_id, trial_range)
       save_fig(myfig, sub_id, trial_range)

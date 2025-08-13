@@ -3,6 +3,8 @@
 import mne
 import numpy as np
 from scipy import stats
+from statsmodels.stats.multitest import multipletests
+from statsmodels.stats.anova import AnovaRM
 
 
 def l2norm(vec, axis=None):
@@ -86,3 +88,68 @@ def print_aov_results(aov_res):
         f_value = aov_res.anova_table.loc[eff, "F Value"]
         p_value = aov_res.anova_table.loc[eff, "Pr > F"]
         print(f'F({num_df},{den_df}) = {f_value:.2f}, p {"< .001" if p_value < 0.001 else f"= {p_value:.3f}"}\n')
+
+
+def run_rmanova_and_posthoc(df_aov, depvar, within, posthoc_dim, posthoc_levels, subject="sub_id"):
+    print(AnovaRM(df_aov,
+                    depvar = depvar,
+                    subject = subject,
+                    within = within).fit())
+
+    pairwise_comps = [(posthoc_levels[i], posthoc_levels[j]) for i in range(len(posthoc_levels))
+                                                for j in range(len(posthoc_levels)) if i < j]
+    posthoc_results = {}
+    for tw1, tw2 in pairwise_comps:
+        t_stat, p_val = stats.ttest_rel(df_aov.query(f"{posthoc_dim} == @tw1")[depvar],
+                                        df_aov.query(f"{posthoc_dim} == @tw2")[depvar],
+                                        nan_policy="omit")
+        posthoc_results[f"{tw1} vs {tw2}"] = (t_stat, p_val)
+
+    p_vals = [p for _, p in posthoc_results.values()]
+    _, p_adj, _, _ = multipletests(p_vals, method="bonferroni")
+    for i, key in enumerate(posthoc_results):
+        print(f"{key}: t = {posthoc_results[key][0]:.2f}, p = {p_adj[i]:.3f}")
+
+
+def check_dispersion(results):
+    """
+    Check for overdispersion in a count data model by comparing residual deviance
+    to residual degrees of freedom.
+
+    The function computes the ratio of the sum of deviance residuals to the residual
+    degrees of freedom. A ratio substantially greater than 1 suggests overdispersion.
+
+    from https://python.plainenglish.io/a-step-by-step-guide-to-count-data-analysis-in-python-a981544fc4f0
+
+    Parameters
+    ----------
+    results : statsmodels.genmod.generalized_linear_model.GLMResults
+        Fitted GLM results object, typically from a Poisson or similar count data model.
+        Must have attributes:
+        - resid_deviance : array-like
+            Deviance residuals from the fitted model.
+        - df_resid : int
+            Residual degrees of freedom.
+
+    Returns
+    -------
+    None
+        Prints the residual deviance to degrees of freedom ratio and a warning
+        if overdispersion is detected.
+    """
+
+    deviance_residuals = results.resid_deviance
+
+    # Calculate residual deviance
+    residual_deviance = sum(deviance_residuals)
+
+    # Calculate degrees of freedom
+    df = results.df_resid
+
+    # Calculate the ratio
+    ratio = residual_deviance / df
+
+    # Display the ratio
+    print("Residual Deviance to Degrees of Freedom Ratio:", ratio)
+    if ratio > 1:
+        print("Warning: The model is overdispersed.")

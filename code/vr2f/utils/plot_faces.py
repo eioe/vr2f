@@ -1,7 +1,7 @@
-"""Plot stimuli faces as PDFs."""
-from pathlib import Path
-
+"""Plot stimuli faces as PDF files."""
 import matplotlib.pyplot as plt
+
+from pathlib import Path
 
 from vr2f.staticinfo import CONSTANTS, PATHS
 
@@ -53,6 +53,8 @@ def plot_faces_pdf():
           pad_inches=0,
           transparent=True,
       )
+
+
 
 if __name__ == "__main__":
   plot_faces_pdf()
