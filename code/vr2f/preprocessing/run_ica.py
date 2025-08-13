@@ -5,8 +5,8 @@ import sys
 from pathlib import Path
 
 import mne
-from vr2fem_analyses import helpers, preprocess
-from vr2fem_analyses.staticinfo import TIMINGS
+from vr2f import helpers, preprocess
+from vr2f.staticinfo import TIMINGS
 
 from vr2f.staticinfo import PATHS
 

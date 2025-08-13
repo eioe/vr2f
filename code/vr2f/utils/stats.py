@@ -91,17 +91,23 @@ def print_aov_results(aov_res):
 
 
 def run_rmanova_and_posthoc(df_aov, depvar, within, posthoc_dim, posthoc_levels, subject="sub_id"):
-    print(AnovaRM(df_aov,
+    res = AnovaRM(df_aov,
                     depvar = depvar,
                     subject = subject,
-                    within = within).fit())
+                    within = within).fit()
+    print_aov_results(res)
 
+    df_posthoc = (df_aov
+                    .groupby([posthoc_dim, subject])
+                    .agg({depvar: "mean"})
+                    .reset_index()
+    )
     pairwise_comps = [(posthoc_levels[i], posthoc_levels[j]) for i in range(len(posthoc_levels))
                                                 for j in range(len(posthoc_levels)) if i < j]
     posthoc_results = {}
     for tw1, tw2 in pairwise_comps:
-        t_stat, p_val = stats.ttest_rel(df_aov.query(f"{posthoc_dim} == @tw1")[depvar],
-                                        df_aov.query(f"{posthoc_dim} == @tw2")[depvar],
+        t_stat, p_val = stats.ttest_rel(df_posthoc.query(f"{posthoc_dim} == @tw1")[depvar],
+                                        df_posthoc.query(f"{posthoc_dim} == @tw2")[depvar],
                                         nan_policy="omit")
         posthoc_results[f"{tw1} vs {tw2}"] = (t_stat, p_val)
 
