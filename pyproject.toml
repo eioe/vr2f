@@ -1,8 +1,8 @@
 # Check this for proper formatting: https://packaging.python.org/en/latest/specifications/declaring-project-metadata/#declaring-project-metadata
 [project]
-name = "vrstereofem"
-version = "0.1.0"
-description = "Decoding facial expressions from eeg in mono vs stereoscopic viewing conditions."
+name = "vr2f"
+version = "1.0.0"
+description = "EEG-decodability of facial expressions and their stereoscopic depth cues in immersive virtual reality."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
@@ -12,7 +12,7 @@ authors = [
 maintainers = [
     { name = "Felix Klotzsche", email = "klotzsche@cbs.mpg.de" },
 ]
-keywords = ["very", "great", "study"] # TODO change to actual keywords
+keywords = ["virtual reality", "EEG", "face processing", "stereoscopic depth"]
 # Check for classifiers: https://pypi.org/classifiers/
 classifiers = [
     "Development Status :: 1 - Planning",
@@ -26,10 +26,20 @@ classifiers = [
 # Similar to a requirements.txt file, fill in the dependencies your project requires
 # Install the project code as Python module with `pip install -e .`
 dependencies = [
-    "ipykernel",
-    "numpy",
-    "pandas",
-    "toml>=0.10; python_version < '3.11'",
+    "ipykernel==6.29.5",
+    "toml==0.10.2",
+    "mne==1.2.3",
+    "autoreject==0.4.3",
+    "ipython==8.12.3",
+    "matplotlib==3.10.5",
+    "numpy==2.3.2",
+    "pandas==1.4.3",
+    "scikit_learn==1.7.1",
+    "scipy==1.16.1",
+    "seaborn==0.13.2",
+    "setuptools==71.0.4",
+    "statsmodels==0.14.2",
+    "tqdm==4.66.4",
 ]
 
 # Following can be co-installed with `pip install -e .[develop]`
@@ -43,10 +53,8 @@ develop = [
 ]
 
 [project.urls]
-homepage = "https://www.vr2f.org" # TODO: change to actual homepage
-documentation = "https://readthedocs.org" # TODO: change to actual documentation
-repository = "https://github.com/eioe/vr2f" # TODO: change to actual repository
-# Consider other URLs: pre-registration, data repository, etc.
+repository = "https://github.com/eioe/vr2f" 
+data = "https://doi.org/10.17617/3.CQ2VXX"
 
 # Entry points for the project
 # For a command line interface (CLI) [uncomment and/or adopt the following if needed]
