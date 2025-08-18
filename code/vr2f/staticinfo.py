@@ -21,16 +21,17 @@ class PATHS:
                               Cannot point to project folder."
             )
         self.DATA_SUBJECTS = Path(self.PATH_PROJECT, "data", "Subjects")
-        self.DATA_00_RAWFIF = Path(self.PATH_PROJECT, "data", "00_raw_fif")
-        self.DATA_01_EPO = Path(self.PATH_PROJECT, "data", "01_epo")
-        self.DATA_02_ICA_AR = Path(self.PATH_PROJECT, "data", "02_ica", "ar")
-        self.DATA_02_ICA = Path(self.PATH_PROJECT, "data", "02_ica")
-        self.DATA_02_EOGANNOT = Path(self.PATH_PROJECT, "data", "02_eogannot")
-        self.DATA_02_POSTICA = Path(self.PATH_PROJECT, "data", "02_ica", "cleaneddata")
-        self.DATA_03_AR = Path(self.PATH_PROJECT, "data", "03_ar")
-        self.DATA_04_DECOD_SENSORSPACE = Path(self.PATH_PROJECT, "data", "04_decod", "sensorspace")
-        self.DATA_ET = Path(self.PATH_PROJECT, "data", "eye_tracking")
-        self.DATA_ET_PREPROC = Path(self.PATH_PROJECT, "data", "eye_tracking", "01_preproc")
+        self.DATA_EEG = Path(self.PATH_PROJECT, "data", "eeg")
+        self.DATA_00_RAWFIF = Path(self.DATA_EEG, "00_raw_fif")
+        self.DATA_01_EPO = Path(self.DATA_EEG, "01_epo")
+        self.DATA_02_ICA_AR = Path(self.DATA_EEG, "02_ica", "ar")
+        self.DATA_02_ICA = Path(self.DATA_EEG, "02_ica")
+        self.DATA_02_EOGANNOT = Path(self.DATA_EEG, "02_eogannot")
+        self.DATA_02_POSTICA = Path(self.DATA_EEG, "02_ica", "cleaneddata")
+        self.DATA_03_AR = Path(self.DATA_EEG, "03_ar")
+        self.DATA_04_DECOD_SENSORSPACE = Path(self.DATA_EEG, "04_decod", "sensorspace")
+        self.DATA_ET = Path(self.PATH_PROJECT, "data", "eyetracking")
+        self.DATA_ET_PREPROC = Path(self.PATH_PROJECT, "data", "eyetracking", "01_preproc")
         self.DATA_ET_DECOD = Path(self.DATA_ET, "03_decoding")
         self.RESULTS = Path(self.PATH_PROJECT, "results")
         self.FIGURES = Path(self.PATH_PROJECT, "results", "figures")
@@ -150,6 +151,6 @@ class CONSTANTS:
         self.ET_SACC_MINAMP = 2  # in dva
         self.ET_FIX_MINDUR = 0.05  # in s
         # participants with higher proportion of rejected epochs will be excluded:
-        self.AR_PROP_EPOS_TO_REJECT_SUB = 0.2
+        self.AR_PROP_EPOS_TO_REJECT_SUB = 0.33
         
 

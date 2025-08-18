@@ -18,6 +18,63 @@ def clean_with_ar_local(
     ar_path=None,
     rand_state=42,
 ):
+    """
+    Clean MNE epoch data using local AutoReject (AR) parameters.
+
+    This function applies the AutoReject algorithm (Jas et al., 2017) to 
+    clean EEG epochs. 
+    It can either read a precomputed AutoReject model from disk or fit 
+    a new one on the provided data. Optionally, the results can be saved 
+    to disk, including the fitted AutoReject object, rejection logs, and 
+    cleaned data (for post-ICA cleaning).
+
+    Parameters
+    ----------
+    subID : str
+        Subject identifier used for file naming when saving/loading AR models.
+    data_ : mne.Epochs
+        MNE Epochs object containing EEG data to be cleaned.
+    n_jobs : int or None, optional
+        Number of parallel jobs to run. If None, defaults to value in `CONFIG().N_JOBS`.
+    ar_from_disc : bool, default=False
+        If True, load an existing AutoReject model from disk instead of fitting a new one.
+    save_to_disc : bool, default=True
+        If True, save the AutoReject model, rejection logs, and optionally cleaned data to disk.
+    ar_path : str or Path or None, optional
+        Path to the directory where AR files should be read/written. 
+        Must be provided if `ar_from_disc` or `save_to_disc` is True.
+        Valid options are:
+        - `PATHS().DATA_02_ICA_AR` (pre-ICA AutoReject)
+        - `PATHS().DATA_03_AR` (post-ICA AutoReject)
+    rand_state : int, default=42
+        Random state used for reproducibility in AutoReject fitting.
+
+    Returns
+    -------
+    epo_clean : mne.Epochs
+        Cleaned MNE Epochs object after AutoReject processing.
+    ar : autoreject.AutoReject
+        The fitted AutoReject object (either loaded from disk or newly computed).
+    reject_log : autoreject.RejectLog
+        Reject log containing details of rejected epochs and channels.
+    
+    Notes
+    -----
+    - When `save_to_disc=True`:
+        - The AutoReject object is saved as a `.fif` file.
+        - Rejection logs are stored as `.csv` in a `rejectlogs/` subdirectory.
+        - Cleaned data (only if post-ICA) is stored in `cleaneddata/` subdirectory.
+
+    References
+    ----------
+    Mainak Jas, Denis Engemann, Federico Raimondo, Yousra Bekhti, and Alexandre Gramfort. 
+    (2017). "Autoreject: Automated artifact rejection for MEG and EEG data." 
+    NeuroImage, 159, 417–429. https://doi.org/10.1016/j.neuroimage.2017.06.034
+
+    See Also
+    --------
+    AutoReject documentation: https://autoreject.github.io
+    """
     paths = PATHS()
     config = CONFIG()
     if n_jobs is None:
@@ -89,6 +146,52 @@ def get_ica_weights(
     save_to_disc=True,
     ica_path=None,
 ):
+    """
+    Compute or load Independent Component Analysis (ICA) weights for EEG/MEG data.
+
+    This function either loads an existing ICA decomposition from disk or 
+    computes a new ICA on the provided MNE Epochs or Raw object. Optionally, 
+    the fitted ICA can be saved to disk for later reuse.
+
+    Parameters
+    ----------
+    subID : str
+        Subject identifier used for file naming when saving/loading ICA solutions.
+    data_ : mne.Epochs or mne.io.Raw | None
+        Data to fit ICA on. Required if `ica_from_disc=False`.
+    picks : str, list, slice, or None, optional
+        Channels to include in ICA fitting. If None, defaults to EEG/MEG channels.
+        See `mne.pick_types` for details.
+    reject : dict or None, optional
+        Rejection parameters to drop bad segments before ICA fitting.
+        Follows the format used in MNE (e.g., `{'eeg': 150e-6}`).
+    method : str, default='picard'
+        ICA fitting method. Options include `'fastica'`, `'picard'`, `'infomax'`, etc.
+        See `mne.preprocessing.ICA` documentation for available methods.
+    fit_params : dict or None, optional
+        Additional parameters passed to the ICA fitting algorithm.
+    ica_from_disc : bool, default=False
+        If True, load an existing ICA object from disk instead of computing a new one.
+    save_to_disc : bool, default=True
+        If True, save the computed ICA object to disk at `ica_path`.
+    ica_path : str or Path or None, optional
+        Path to directory for reading/writing ICA files. Must be provided if 
+        `ica_from_disc=True` or `save_to_disc=True`.
+
+    Returns
+    -------
+    ica : mne.preprocessing.ICA
+        The fitted or loaded ICA object containing spatial filters and unmixing matrix.
+    
+    References
+    ----------
+    Hyvärinen, A., & Oja, E. (2000). Independent component analysis: 
+    algorithms and applications. Neural Networks, 13(4–5), 411–430.
+    https://doi.org/10.1016/S0893-6080(00)00026-5
+
+    MNE-Python documentation: https://mne.tools/stable/generated/mne.preprocessing.ICA.html
+    """
+
     # Load ICA data
     if ica_from_disc:
         ica = mne.preprocessing.read_ica(fname=Path(ica_path, subID + "-ica.fif"))
