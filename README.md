@@ -16,11 +16,11 @@
 
 📑 **Preprint:** [ tbd ]  
 
-![fig1: exp design](/vr2f/resources/images/fig1.png)
+![fig1: exp design](/resources/images/fig1.png)
 ## Abstract
 Face perception typically occurs in three-dimensional space, where stereoscopic depth cues enrich the perception of facial features. Yet, most neurophysiological research on face processing relies on two-dimensional displays, potentially overlooking the role of stereoscopic depth information. Here, we combine immersive virtual reality (VR), electroencephalography (EEG), and eye tracking to examine the neural representation of faces under controlled manipulations of stereoscopic depth. Thirty-four participants viewed computer-generated faces with neutral, happy, angry, and surprised expressions in frontal view under monoscopic and stereoscopic viewing conditions. Using time-resolved multivariate decoding, we show that EEG signals in immersive VR conditions can reliably differentiate facial expressions. Stereoscopic depth cues elicited a distinct and decodable neural signature, confirming the sensitivity of our approach to depth-related processing. Yet, expression decoding remained robust across depth conditions, indicating that under controlled frontal viewing, the neural encoding of facial expressions is invariant to binocular depth cues. Eye tracking showed that expression-related gaze patterns contained comparable information but did not account for neural representations, while depth information was absent in gaze patterns—consistent with dissociable representational processes. Our findings demonstrate the feasibility of EEG-based neural decoding in fully immersive VR as a tool for investigating face perception in naturalistic settings and provide new evidence for the stability of expression representations across depth variations in three-dimensional viewing conditions.
 
-![fig2: decoding results](/vr2f/resources/images/fig2.png)
+![fig2: decoding results](/resources/images/fig2.png)
 
 ## Instructions
 
@@ -55,7 +55,7 @@ Put it into the hierarchy next to the `code/` folder in a folder called `data/`.
 <details>
 <summary> click here </summary>
 
-![working tree screenshot](/vr2f/resources/images/workingtree.png)
+![working tree screenshot](/resources/images/workingtree.png)
 </details>
 
 
@@ -101,7 +101,7 @@ For **cross-decoding** (only implemented for decoding the emotional expression),
 To calculate the source activation timecourses, run [decoding_calc_source_timecourses.py](vr2f/code/vr2f/decoding/decoding_calc_source_timecourses.py)  
 (1 CL argument -> participant idx). 
 
-![fig 3: source reconstruction results](/vr2f/resources/images/fig3.png)
+![fig 3: source reconstruction results](/resources/images/fig3.png)
 
 #### Plot the results & calculate stats
 Check out the notebook [decoding_plotters.ipynb](vr2f/code/notebooks/decoding/decoding_plotters.ipynb).  
@@ -116,7 +116,7 @@ Use the notebook [behavior_analysis.ipynb](vr2f/code/notebooks/behavior/behavior
 ### Eye Tracking
 Use and follow instructions in the notebooks in [/code/notebooks/eyetracking](vr2f/code/notebooks/eyetracking).  
 
-![fig 4: eye tracking results](/vr2f/resources/images/fig4.png)
+![fig 4: eye tracking results](/resources/images/fig4.png)
 
 ---
 
