@@ -1,68 +1,42 @@
 # vrstereofem – **code**
 
-    Last update:    March 18, 2024
-    Status:         work in progress
+    Last update:    August 18, 2025
+    Author:         Felix Klotzsche
 
 ***
 
-## Description
 
-*List relevant information one needs to know about the code of this research project.
-For instance, one could describe the computational model that was applied,
-and which statistical approach has been chosen for.*
+## HPC
 
-## Processing steps
+SLURM scripts for running relevant processing steps on a compute cluster. 
 
-### 0. Cleansing
-...
 
-### 1. Preprocessing
+## notebooks
+For some analysis and esp. visualization steps, we used Jupyter notebooks.  
+- behavioral results
+- plotting decoding performance 
+- plotting spatial patterns of decoders
+- stats on decoding
+- eye tracking analyses
+- ...
 
-*General information regarding preprocessing could be written in the data [README.md](../data/README.md).
-One could add here more implementation-specific information (e.g., which toolboxes were used).*
+## RScripts
+Only 1 script which reproduces a behavioral figure with the data from Gilbert et al. (2019). 
 
-### 2. Decoding
+## vr2f
+Main part of the package. Contains workhorse scripts.
 
-...
 
-### 3. ERPs
-
-...
-
-## Codebase
-
-*Refer to the corresponding code/scripts written for the analysis/simulation/etc.
-Which languages (Python, R, Matlab, ...) were used? Are there specific package versions,
-which one should take care of? Or is there a container (e.g., Docker) or virtual environment?*
-
-### Python
-
-Python code (in the structure of a python package) is stored in `./code/vr2f/`
-
-To install the research code as package, run the following code in the project root directory:
-
-```shell
-pip install -e ".[develop]"
-```
-
-#### Jupyter Notebooks
-
-Jupyter notebooks are stored in `./code/notebooks/`
-
-### R
-
-*Initialize a new R-project in the project root of `vr2f` with `RStudio`.
-R-scripts can be stored in `./code/Rscripts/`.
-Use R-packages in Python with, e.g., [rpy2](https://rpy2.github.io/), or use Python packages in R using,
-e.g., [reticulate](https://rstudio.github.io/reticulate/)*.
-
-### Configs
+## Configs
 
 Paths to data, parameter settings, etc. are stored in the config script: `./code/vr2f/staticinfo.py`
 
 
-## COPYRIGHT/LICENSE
+## Python
 
-*One could add information about code sharing
-(e.g., is the code published on GitLab or GitHub ...),
-license and copy right issues*
+To install the research code as package, run the following code in the project root directory:
+
+```shell
+pip install -e "."
+```
+
