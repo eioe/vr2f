@@ -196,7 +196,6 @@ def tost_per_timewindow(X, Y, times, thresh=None):
     thresh_arg = thresh  # bc we will overwrite this later
     print(f"TOST results:")
     for key, erp_times in timings.ERP_WINDOWS.items():
-        print(f"--- {key} ---")
         idx = np.where((times > erp_times[0]) & (times < erp_times[1]))[0]
 
         X_ = X[:, idx].mean(axis=1)
@@ -206,10 +205,13 @@ def tost_per_timewindow(X, Y, times, thresh=None):
             sd_x = X[:, idx].std(axis=1).mean()
             sd_y = Y[:, idx].std(axis=1).mean()
             thresh = np.mean([sd_x, sd_y])
-            print(f"Using threshold based on (subject-level, within) SD: {thresh}")
 
         res = ttost_paired(X_, Y_, -thresh, thresh)
-        print(f"p = {res[0]:0.3}")
         results[key] = res
+    
+    p_vals = [r[0] for r in results.values()]
+    p_vals_corr = multipletests(p_vals, method="holm")
+    for win, p_val, p_val_corr in zip(results.keys(), p_vals, p_vals_corr[1]):
+        print(f"{win}: p = {p_val:0.5f} (p_corr = {p_val_corr:0.5f})")
 
     return results, thresh
