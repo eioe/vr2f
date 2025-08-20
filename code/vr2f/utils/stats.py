@@ -5,6 +5,8 @@ import numpy as np
 from scipy import stats
 from statsmodels.stats.multitest import multipletests
 from statsmodels.stats.anova import AnovaRM
+from statsmodels.stats.weightstats import ttost_paired
+from vr2f.staticinfo import TIMINGS
 
 
 def l2norm(vec, axis=None):
@@ -159,3 +161,55 @@ def check_dispersion(results):
     print("Residual Deviance to Degrees of Freedom Ratio:", ratio)
     if ratio > 1:
         print("Warning: The model is overdispersed.")
+
+
+
+def tost_per_timewindow(X, Y, times, thresh=None):
+    """
+    Run paired TOST within predefined time windows; print p-values and return results.
+
+    For each (start, end) in ``TIMINGS().ERP_WINDOWS`` (same units as ``times``),
+    selects columns where ``start < times < end``, averages ``X`` and ``Y`` across
+    those columns per row, runs ``ttost_paired`` with bounds ``[-thresh, +thresh]``,
+    and prints ``"{name}: p = ..."`` using ``res[0]`` as the p-value.
+
+    Parameters
+    ----------
+    X : array_like, shape (n_samples, n_times)
+        Condition A; rows are samples/subjects, columns are time points.
+    Y : array_like, shape (n_samples, n_times)
+        Condition B; aligned to ``X``.
+    times : array_like, shape (n_times,)
+        Time vector aligned with columns of ``X`` and ``Y``; edge values are excluded.
+    thresh : float
+        Positive equivalence margin Δ; tests against ``[-Δ, +Δ]``.
+
+    Returns
+    -------
+    results : dict
+        Mapping ``window_name -> res`` where ``res`` is whatever ``ttost_paired``
+        returns for that window.
+    """
+
+    timings = TIMINGS()
+    results = {}
+    thresh_arg = thresh  # bc we will overwrite this later
+    print(f"TOST results:")
+    for key, erp_times in timings.ERP_WINDOWS.items():
+        print(f"--- {key} ---")
+        idx = np.where((times > erp_times[0]) & (times < erp_times[1]))[0]
+
+        X_ = X[:, idx].mean(axis=1)
+        Y_ = Y[:, idx].mean(axis=1)
+
+        if thresh_arg is None:
+            sd_x = X[:, idx].std(axis=1).mean()
+            sd_y = Y[:, idx].std(axis=1).mean()
+            thresh = np.mean([sd_x, sd_y])
+            print(f"Using threshold based on (subject-level, within) SD: {thresh}")
+
+        res = ttost_paired(X_, Y_, -thresh, thresh)
+        print(f"p = {res[0]:0.3}")
+        results[key] = res
+
+    return results, thresh

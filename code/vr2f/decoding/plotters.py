@@ -780,3 +780,4 @@ def print_table_contrasts(sub_list_str, variable="Peak", notebook=True, print_la
       display(sdf)
     if print_latex:
       print(sdf.to_latex(multicol_align="c", hrules=True, column_format="lcccccccc"))
+
