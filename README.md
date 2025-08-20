@@ -45,6 +45,7 @@ Then install the code of the research project as python package:
 # assuming your current working dircetory is the project root
 pip install -e .
 ```
+
 **Note**: The `-e` flag installs the package in editable mode,
 i.e., changes to the code will be directly reflected in the installed package.
 
@@ -124,7 +125,11 @@ Use and follow instructions in the notebooks in [/code/notebooks/eyetracking](./
 
 ## Publications
 
-[tbc]
+Klotzsche et al. (2023). Decoding the neural representations of emotional faces in stereo- versus monoscopic viewing conditions. _Journal of Vision_, 23(9), 5618. https://doi.org/10.1167/jov.23.9.5618 [Poster @VSS 2023]
+
+Klotzsche et al. (2025). EEG-decodability of facial expressions and their stereoscopic depth cues in immersive virtual reality. _bioRxiv_. https://doi.org/10.1101/2025.08.18.670974 [preprint]
+> code release: [v1.0.0](./releases/tag/v1.0.0)
+
 
 ## Contributors/Collaborators
 [Felix Klotzsche*](https://bsky.app/profile/flxklotz.bsky.social "Follow on Bluesky"),
