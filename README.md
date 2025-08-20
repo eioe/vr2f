@@ -3,8 +3,8 @@
 `[Last update: August 20, 2025]`
 
 ***
-    Status:     preprint | submitted
-    Author:  Felix Klotzsche
+    Status:     preprint 
+    Author:     Felix Klotzsche
     Contact:    klotzsche@cbs.mpg.de
 
 ***
