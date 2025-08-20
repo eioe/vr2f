@@ -141,3 +141,8 @@ This study was conducted at the [Max Planck Institute for Human Cognitive and Br
 as part of the [NEUROHUM project](https://neurohum.cbs.mpg.de "Go the project site").
 
 [![NEUROHUM Logo](https://neurohum.cbs.mpg.de/assets/institutes/headers/cbsneurohum-desktop-en-cc55f3158c5428ca969719e99df1c4f636a0662c1c42e409d476328092106060.svg)](https://neurohum.cbs.mpg.de "Go the project site")
+
+---
+This repository was structured by the power of [scilaunch](https://github.com/SHEscher/scilaunch) 🚀. 
+
+---
