@@ -1,20 +1,19 @@
 # Study VR2F: **EEG-decodability of facial expressions and their stereoscopic depth cues in immersive virtual reality**
 
-`[Last update: August 18, 2025]`
+`[Last update: August 20, 2025]`
 
 ***
-    Period:     2024-03 - 2025-08
     Status:     preprint | submitted
-    Author(s):  Felix Klotzsche
+    Author:  Felix Klotzsche
     Contact:    klotzsche@cbs.mpg.de
 
 ***
 
 <!--📖 **Publication:**  [Klotzsche, et al. (2025, ...)](https://...) -->
 
-💽 **Data:** https://doi.org/10.17617/3.KJGEZQ 
+💽 **Data:** https://doi.org/10.17617/3.KJGEZQ
 
-📑 **Preprint:** [ tbd ]  
+📑 **Preprint:** https://doi.org/10.1101/2025.08.18.670974
 
 ---
 
