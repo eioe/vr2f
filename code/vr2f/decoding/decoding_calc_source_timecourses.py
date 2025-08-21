@@ -42,7 +42,10 @@ def get_epos(subID):
     )
     epos = mne.read_epochs(fname, verbose=False)
     epos = epos.pick_types(eeg=True)
+    easycap_montage = mne.channels.make_standard_montage("easycap-M1")
+    epos.set_montage(easycap_montage, on_missing="ignore")
     epos = epos.set_eeg_reference("average", projection=True)
+    epos.apply_proj()
     return epos
 
 
@@ -71,6 +74,15 @@ def create_fake_info(epos, pattern_times):
   return info
 
 
+def make_pattern_info(epos, pattern_times):
+    sfreq = 1.0 / np.median(np.diff(pattern_times))
+    info = mne.create_info(epos.ch_names, sfreq=sfreq, ch_types='eeg')
+    # copy montage & bads (but no projs)
+    info.set_montage(epos.get_montage())
+    info['bads'] = epos.info.get('bads', []).copy()
+    return info
+
+
 def get_fwd_solution(src, info, from_disk=False):
   config = CONFIG()
   fs_dir = fetch_fsaverage(verbose=True)
@@ -89,10 +101,6 @@ def get_fwd_solution(src, info, from_disk=False):
 
 def get_inv_operator(fwd, epos, pattern_times):
     noise_cov = mne.compute_covariance(epos, tmax=0)
-    # Build new pseudo Evoke obj so we can adapt sfreq:
-    easycap_montage = mne.channels.make_standard_montage("easycap-M1")
-    info = mne.create_info(ch_names=epos.ch_names, sfreq=1 / np.median(np.diff(pattern_times)), ch_types="eeg")
-    info.set_montage(easycap_montage)
     inv_op = mne.minimum_norm.make_inverse_operator(
         epos.info,
         fwd,
@@ -101,7 +109,7 @@ def get_inv_operator(fwd, epos, pattern_times):
         loose=0.0,  # needs to be zero if Fixed is true
         depth=0.8,  # ignored by eLoreta
     )
-    return inv_op, info
+    return inv_op
 
 
 def get_src_timecourse(sub_id, contrast, pattern, pattern_times, inv_op, info,
@@ -121,7 +129,7 @@ def get_src_timecourse(sub_id, contrast, pattern, pattern_times, inv_op, info,
     if not from_disk:
         sub_pattern_src = EvokedArray(pattern, info, tmin=pattern_times[0])
         inst = sub_pattern_src.set_eeg_reference("average", projection=True)
-        inst.data = sub_pattern_src.data
+        inst.apply_proj()
         stc = abs(
             mne.minimum_norm.apply_inverse(
                 inst,
@@ -179,18 +187,22 @@ def get_src_timecourse_multiclass(sub_id, contrast, pattern, pattern_times, inv_
 
 def process_sub(sub_id, contrast, sub_pattern, pat_times, viewcond=""):
     # Get the source space and the forward solution (needs to be done only once)
-    src = get_fsavg_src(from_disk=True)
+    src = get_fsavg_src(from_disk=False)
     epos = get_epos(sub_id)
-    info = create_fake_info(epos, pat_times)
-    fwd = get_fwd_solution(src, info, from_disk=True)  # takes a long time if not read from disc
-    info = create_fake_info(epos, pat_times)
-    inv_op, info = get_inv_operator(fwd, epos, pat_times)
+    #info = create_fake_info(epos, pat_times)
+    fwd = get_fwd_solution(src, epos.info, from_disk=False)  # takes a long time if not read from disc
+    # align forward to current channel list/order
+    fwd  = mne.pick_channels_forward(fwd, include=epos.info['ch_names'])
+    inv_op = get_inv_operator(fwd, epos, pat_times)
+
+    pat_info = make_pattern_info(epos, pat_times)
+
     if sub_pattern.ndim == 3 and len(contrast.split("_vs_")) > 2:
         print(f"Processing {sub_id} for multiclass contrast {contrast}")
-        stc = get_src_timecourse_multiclass(sub_id, contrast, sub_pattern, pat_times, inv_op, info,
+        stc = get_src_timecourse_multiclass(sub_id, contrast, sub_pattern, pat_times, inv_op, pat_info,
                                             viewcond=viewcond, from_disk=False)
     else:
-        stc = get_src_timecourse(sub_id, contrast, sub_pattern, pat_times, inv_op, info,
+        stc = get_src_timecourse(sub_id, contrast, sub_pattern, pat_times, inv_op, pat_info,
                                  viewcond=viewcond, from_disk=False)
     return stc
 
@@ -198,7 +210,7 @@ def process_sub(sub_id, contrast, sub_pattern, pat_times, viewcond=""):
 def main(sub_nr):
 
     contrasts = ["neutral_vs_happy_vs_angry_vs_surprised",
-               "id1_vs_id2_vs_id3",
+            #   "id1_vs_id2_vs_id3",
             #    "mono_vs_stereo",
             #    "angry_vs_happy",
             #    "angry_vs_neutral",
@@ -207,7 +219,7 @@ def main(sub_nr):
             #    "happy_vs_surprised",
             #    "surprised_vs_neutral",
             ]
-    viewconds = ["mono", "stereo", ""]  # ""
+    viewconds = [""]  # ["mono", "stereo", ""]  # ""
 
     for vc in viewconds:
         for contrast in contrasts:

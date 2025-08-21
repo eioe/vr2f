@@ -15,6 +15,8 @@ def parse_args():
         default="neutral_vs_happy_vs_angry_vs_surprised",
         help="Contrast to plot",
     )
+    parser.add_argument("--no-save", dest="save", action="store_false",
+                        default=True, help="Do not save the image(s)")
     return parser.parse_args()
 
 def load_labels(hemi="lh"):
@@ -71,6 +73,7 @@ def main():
     args = parse_args()
     hemi = args.hemi
     contrast = args.contrast
+    save_img = args.save
 
     times = [0.1, 0.17, 0.26, 0.5]  # P1, N170, EPN, LPC
     views = ["lat", "par"]
@@ -80,7 +83,7 @@ def main():
     paths = PATHS()
 
 
-    path_stcs = Path(f"Data/04_decod/sensorspace/{contrast}/roc_auc_ovr/patterns/src_timecourses/mean/")
+    path_stcs = Path(f"{paths.DATA_04_DECOD_SENSORSPACE}/{contrast}/roc_auc_ovr/patterns/src_timecourses/mean/")
     for f in path_stcs.iterdir():
         print(f)
 
@@ -90,7 +93,7 @@ def main():
     brain = stc.plot(
         subject="fsaverage",
         hemi=hemi,
-        surface="white",
+        surface="inflated",
         views="lat",
         initial_time=0,
         # cortex="white",
@@ -135,11 +138,16 @@ def main():
         for time in times:
             brain.set_time(time)
             brain.show_view(view)
-            save_brain_screenshot(brain, hemi, view, time, contrast)
+            print(f"Showing: {view} view at time {time}")
+            print(f"Contrast: {contrast}")
+            input("Press enter to move on.")
+            if save_img:
+                save_brain_screenshot(brain, hemi, view, time, contrast)
 
         brain.set_time(0)
         plot_areas(brain, labels, col_dict)
-        save_brain_screenshot(brain, hemi, view, 0, "areas")
+        if save_img:
+            save_brain_screenshot(brain, hemi, view, 0, "areas")
 
 if __name__ == "__main__":
     main()
