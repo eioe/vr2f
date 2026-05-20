@@ -11,7 +11,7 @@
 
 <!--📖 **Publication:**  [Klotzsche, et al. (2025, ...)](https://...) -->
 
-💽 **Data:** https://doi.org/10.17617/3.KJGEZQ
+💽 **Data:** https://doi.org/10.17617/3.CQ2VXX
 
 📑 **Preprint:** https://doi.org/10.1101/2025.08.18.670974
 
