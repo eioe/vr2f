@@ -164,7 +164,7 @@ def check_dispersion(results):
 
 
 
-def tost_per_timewindow(X, Y, times, thresh=None):
+def tost_per_timewindow(X, Y, times, thresh=None, thresh_calc="sd", alternative="two-sided"):
     """
     Run paired TOST within predefined time windows; print p-values and return results.
 
@@ -183,6 +183,17 @@ def tost_per_timewindow(X, Y, times, thresh=None):
         Time vector aligned with columns of ``X`` and ``Y``; edge values are excluded.
     thresh : float
         Positive equivalence margin Δ; tests against ``[-Δ, +Δ]``.
+        If ``None``, it is computed based on ``thresh_calc``. Default is ``None``.
+    thresh_calc : str, optional
+        Method to compute ``thresh`` if it is ``None``. Options are:
+        - "sd": mean of the standard deviations of ``same`` and ``cross`` within the window.
+        - "pwr": threshold based on power analysis (Cohen's d for 0.33 power, alpha=0.05, one-sided).
+        Default is "sd".
+    alternative : str, optional
+        Type of TOST to perform. Options are:
+        - "two-sided": use largest p-value (both bounds tested).
+        - "larger": test if ``same`` is not larger than ``cross`` -> use p-value of upper bound.
+        Default is "two-sided".
 
     Returns
     -------
@@ -191,27 +202,47 @@ def tost_per_timewindow(X, Y, times, thresh=None):
         returns for that window.
     """
 
+    from statsmodels.stats.power import TTestPower
+
     timings = TIMINGS()
-    results = {}
+    p_vals_raw = {}
     thresh_arg = thresh  # bc we will overwrite this later
-    print(f"TOST results:")
+    print(f"TOST results [{alternative}]:")
     for key, erp_times in timings.ERP_WINDOWS.items():
         idx = np.where((times > erp_times[0]) & (times < erp_times[1]))[0]
 
-        X_ = X[:, idx].mean(axis=1)
-        Y_ = Y[:, idx].mean(axis=1)
+        same_ = X[:, idx].mean(axis=1)
+        cross_ = Y[:, idx].mean(axis=1)
 
-        if thresh_arg is None:
-            sd_x = X[:, idx].std(axis=1).mean()
-            sd_y = Y[:, idx].std(axis=1).mean()
+        if thresh_arg is None and thresh_calc == "sd":
+            sd_x = X[:, idx].std(axis=1, ddof=1).mean()
+            sd_y = Y[:, idx].std(axis=1, ddof=1).mean()
             thresh = np.mean([sd_x, sd_y])
+            print(f"Using mean SD as threshold: {thresh:0.4f}")
 
-        res = ttost_paired(X_, Y_, -thresh, thresh)
-        results[key] = res
-    
-    p_vals = [r[0] for r in results.values()]
-    p_vals_corr = multipletests(p_vals, method="holm")
-    for win, p_val, p_val_corr in zip(results.keys(), p_vals, p_vals_corr[1]):
+        elif thresh_arg is None and thresh_calc == "pwr":
+            power = TTestPower()
+            d_sesoi = power.solve_power(power=0.8, nobs=len(same_), alpha=0.05, alternative=alternative) 
+            diff = same_ - cross_
+            sd = diff.std(ddof=1)
+            thresh = d_sesoi * sd
+            print(f"{key}: Using power-based threshold: {thresh:0.4f} [ROC-AUC] (d = {d_sesoi:0.4f}, sd = {sd:0.4f})")
+
+        else:
+            print(f"Using user-defined threshold: {thresh:0.4f}")
+
+        # two-sided TOST:
+        res = ttost_paired(same_, cross_, -thresh, thresh)
+
+        if alternative == "two-sided":
+            p_vals_raw[key] = res[0]
+        elif alternative == "larger":
+            p_vals_raw[key] = res[2][1]
+        else:
+            raise ValueError("alternative must be 'two-sided' or 'larger'")
+
+    p_vals_corr = multipletests(list(p_vals_raw.values()), method="holm")
+    for win, p_val, p_val_corr in zip(p_vals_raw.keys(), p_vals_raw.values(), p_vals_corr[1]):
         print(f"{win}: p = {p_val:0.5f} (p_corr = {p_val_corr:0.5f})")
 
-    return results, thresh
+    return p_vals_raw, thresh
