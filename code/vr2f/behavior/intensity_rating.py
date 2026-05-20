@@ -12,6 +12,7 @@ def get_intensity_ratings():
   paths = PATHS()
   path_subs = paths.DATA_SUBJECTS
   sub_list_str = sorted(os.listdir(path_subs))
+  sub_list_str = [s for s in sub_list_str if s.startswith('VR2FEM')]
 
   df_ratings = pd.DataFrame()
   for sub_id in sub_list_str:
